@@ -1,0 +1,2708 @@
+{
+  "id": "6206f9c2-7121-463a-9be7-45b330c59034",
+  "revision": 0,
+  "last_node_id": 65,
+  "last_link_id": 0,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "ImageToFloat32",
+      "pos": [
+        23038.033969058833,
+        132.80297613095354
+      ],
+      "size": [
+        299.203125,
+        138
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageToFloat32"
+      },
+      "widgets_values": [
+        false,
+        2.2
+      ]
+    },
+    {
+      "id": 11,
+      "type": "ImageToFloat32",
+      "pos": [
+        20024.085466121425,
+        -1774.515142143921
+      ],
+      "size": [
+        404.734375,
+        140.96875
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageToFloat32"
+      },
+      "widgets_values": [
+        false,
+        2.2
+      ]
+    },
+    {
+      "id": 12,
+      "type": "Float32ColorCorrect",
+      "pos": [
+        19550.446480762632,
+        -1208.2970512591883
+      ],
+      "size": [
+        456.15625,
+        406.90625
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Float32ColorCorrect"
+      },
+      "widgets_values": [
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": 13,
+      "type": "HDRExpandDynamicRange",
+      "pos": [
+        20073.138351106303,
+        -823.1636537674394
+      ],
+      "size": [
+        378.421875,
+        238
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "HDRExpandDynamicRange"
+      },
+      "widgets_values": [
+        2.2,
+        1,
+        0,
+        14,
+        1.5
+      ]
+    },
+    {
+      "id": 14,
+      "type": "HDRToneMap",
+      "pos": [
+        19562.144908479888,
+        -1652.9400050682839
+      ],
+      "size": [
+        417.546875,
+        399.3125
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "HDRToneMap"
+      },
+      "widgets_values": [
+        "🎬 Cinematic Film",
+        "filmic_aces",
+        0,
+        2.2,
+        1,
+        1,
+        1,
+        0.5,
+        0,
+        true
+      ]
+    },
+    {
+      "id": 15,
+      "type": "ColorSpaceConvert",
+      "pos": [
+        20589.636729207105,
+        -1276.6733016000337
+      ],
+      "size": [
+        489.328125,
+        209.96875
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ColorSpaceConvert"
+      },
+      "widgets_values": [
+        "sRGB",
+        "ACEScg",
+        "Bradford",
+        true
+      ]
+    },
+    {
+      "id": 16,
+      "type": "SaveImageEXR",
+      "pos": [
+        20622.59235701015,
+        -438.29856237907643
+      ],
+      "size": [
+        442.421875,
+        257.703125
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImageEXR"
+      },
+      "widgets_values": [
+        "output/hdr_",
+        "float32",
+        "ZIP",
+        true,
+        ""
+      ]
+    },
+    {
+      "id": 17,
+      "type": "LoadImageEXR",
+      "pos": [
+        20048.688599435693,
+        -1291.5374829527068
+      ],
+      "size": [
+        445.65625,
+        420.28125
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "metadata",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImageEXR"
+      },
+      "widgets_values": [
+        "none",
+        0,
+        "image"
+      ]
+    },
+    {
+      "id": 18,
+      "type": "SaveImage16bit",
+      "pos": [
+        20089.489150188958,
+        -533.4304668953469
+      ],
+      "size": [
+        329.984375,
+        148.65625
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage16bit"
+      },
+      "widgets_values": [
+        "output/16bit_",
+        "PNG"
+      ]
+    },
+    {
+      "id": 19,
+      "type": "HDRHistogram",
+      "pos": [
+        19547.28054567747,
+        -198.5259751609915
+      ],
+      "size": [
+        426.25,
+        211.515625
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "histogram",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "stats",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "HDRHistogram"
+      },
+      "widgets_values": [
+        "luminance",
+        true,
+        14
+      ]
+    },
+    {
+      "id": 20,
+      "type": "LogCurveEncode",
+      "pos": [
+        19526.47188935202,
+        -762.2180134730459
+      ],
+      "size": [
+        433.75,
+        256.65625
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "log_encoded",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "curve_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LogCurveEncode"
+      },
+      "widgets_values": [
+        "ARRI LogC3 (EI 800)",
+        true,
+        2.2,
+        0,
+        true
+      ]
+    },
+    {
+      "id": 21,
+      "type": "LogCurveDecode",
+      "pos": [
+        19557.685599639157,
+        -450.1896897215254
+      ],
+      "size": [
+        432.359375,
+        210.59375
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "linear_image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LogCurveDecode"
+      },
+      "widgets_values": [
+        "ARRI LogC3 (EI 800)",
+        1,
+        0,
+        true
+      ]
+    },
+    {
+      "id": 22,
+      "type": "HDRExposureBlend",
+      "pos": [
+        20589.89075884484,
+        -1694.560220915043
+      ],
+      "size": [
+        433.390625,
+        356.078125
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "low_exposure",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "high_exposure",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mid_exposure",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "blended_hdr",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "blend_mask",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "blend_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "HDRExposureBlend"
+      },
+      "widgets_values": [
+        "Mertens Fusion",
+        1,
+        1,
+        0.3,
+        -2,
+        2,
+        false
+      ]
+    },
+    {
+      "id": 23,
+      "type": "HDRShadowHighlightRecovery",
+      "pos": [
+        20024.08546612143,
+        -1596.4554264191106
+      ],
+      "size": [
+        491.0625,
+        270
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "recovered_image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "HDRShadowHighlightRecovery"
+      },
+      "widgets_values": [
+        0.5,
+        0.5,
+        0.25,
+        0.75,
+        0.5,
+        0
+      ]
+    },
+    {
+      "id": 24,
+      "type": "OCIOColorTransform",
+      "pos": [
+        19547.28054567747,
+        -1980.2737052183033
+      ],
+      "size": [
+        441.96875,
+        280.65625
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "transformed_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "colorspaces_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "OCIOColorTransform"
+      },
+      "widgets_values": [
+        "ACES - ACEScg",
+        "Output - sRGB",
+        "",
+        "",
+        "Forward"
+      ]
+    },
+    {
+      "id": 25,
+      "type": "OCIOListColorspaces",
+      "pos": [
+        20024.08546612143,
+        -1980.2740681177856
+      ],
+      "size": [
+        484.9375,
+        150
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "colorspaces_list",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "OCIOListColorspaces"
+      },
+      "widgets_values": [
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 26,
+      "type": "LUTApply",
+      "pos": [
+        20607.727994207733,
+        -1980.2737052183033
+      ],
+      "size": [
+        416.5,
+        237.109375
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "graded_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "lut_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LUTApply"
+      },
+      "widgets_values": [
+        "",
+        1,
+        "Tetrahedral",
+        false
+      ]
+    },
+    {
+      "id": 27,
+      "type": "GPUColorMatrix",
+      "pos": [
+        20618.13278107541,
+        -786.0027467614045
+      ],
+      "size": [
+        400,
+        241.65625
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "transformed_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "device_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GPUColorMatrix"
+      },
+      "widgets_values": [
+        "Identity",
+        true,
+        ""
+      ]
+    },
+    {
+      "id": 28,
+      "type": "GPUTensorOps",
+      "pos": [
+        19569.577089881088,
+        369.7196351323614
+      ],
+      "size": [
+        424.171875,
+        221.921875
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "processed_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "performance_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GPUTensorOps"
+      },
+      "widgets_values": [
+        "Exposure",
+        0,
+        true
+      ]
+    },
+    {
+      "id": 29,
+      "type": "HDR360Generate",
+      "pos": [
+        20035.976956363356,
+        -326.3613097591642
+      ],
+      "size": [
+        531.03125,
+        481.28125
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source_image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "panorama",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "projection_map",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "HDR360Generate"
+      },
+      "widgets_values": [
+        "Equirectangular",
+        4096,
+        2048,
+        360,
+        180,
+        0,
+        0,
+        0,
+        "Lanczos",
+        "Mirror",
+        0
+      ]
+    },
+    {
+      "id": 30,
+      "type": "DaVinciWideGamut",
+      "pos": [
+        20050.84131916577,
+        211.73642602709515
+      ],
+      "size": [
+        483.765625,
+        170.625
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DaVinciWideGamut"
+      },
+      "widgets_values": [
+        "Linear to DaVinci WG"
+      ]
+    },
+    {
+      "id": 31,
+      "type": "ARRIWideGamut4",
+      "pos": [
+        20607.697510651207,
+        -957.6016432427841
+      ],
+      "size": [
+        458.890625,
+        112.65625
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ARRIWideGamut4"
+      },
+      "widgets_values": [
+        "AWG4 to ACEScg"
+      ]
+    },
+    {
+      "id": 32,
+      "type": "FXTD_Grade",
+      "pos": [
+        20622.592357010148,
+        -125.6849724871845
+      ],
+      "size": [
+        372.5625,
+        558
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTD_Grade"
+      },
+      "widgets_values": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": 33,
+      "type": "SaveHDRI",
+      "pos": [
+        19542.821236836746,
+        44.31256833483212
+      ],
+      "size": [
+        424.578125,
+        277.96875
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "panorama",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "file_path",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveHDRI"
+      },
+      "widgets_values": [
+        "output/hdri_",
+        "EXR",
+        "float32",
+        "ZIP",
+        true,
+        1
+      ]
+    },
+    {
+      "id": 34,
+      "type": "FXTD_RadianceViewer",
+      "pos": [
+        21182.699188902145,
+        -2506.2596949978656
+      ],
+      "size": [
+        936.484375,
+        406
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "compare_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "FXTD_RadianceViewer"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 35,
+      "type": "FXTDAIUpscale",
+      "pos": [
+        21200.267482757663,
+        -2002.2226654251006
+      ],
+      "size": [
+        270,
+        256.65625
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDAIUpscale"
+      },
+      "widgets_values": [
+        "RealESRGAN_x4plus",
+        512,
+        32,
+        true,
+        false
+      ]
+    },
+    {
+      "id": 36,
+      "type": "FXTDBitDepthConvert",
+      "pos": [
+        21623.226169771806,
+        -2002.2226654251006
+      ],
+      "size": [
+        305.265625,
+        203.3125
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "converted_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "bit_depth_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDBitDepthConvert"
+      },
+      "widgets_values": [
+        "32-bit Float",
+        "None",
+        1
+      ]
+    },
+    {
+      "id": 37,
+      "type": "FXTDDownscale32bit",
+      "pos": [
+        21212.429234141455,
+        -1636.430263764363
+      ],
+      "size": [
+        305.0625,
+        313.65625
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "downscaled_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDDownscale32bit"
+      },
+      "widgets_values": [
+        0.5,
+        "lanczos",
+        0.5,
+        0,
+        true,
+        true
+      ]
+    },
+    {
+      "id": 38,
+      "type": "FXTDDownscale32bit",
+      "pos": [
+        21629.472319019897,
+        -1636.430263764363
+      ],
+      "size": [
+        305.0625,
+        313.65625
+      ],
+      "flags": {},
+      "order": 28,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "downscaled_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDDownscale32bit"
+      },
+      "widgets_values": [
+        0.5,
+        "lanczos",
+        0.5,
+        0,
+        true,
+        true
+      ]
+    },
+    {
+      "id": 39,
+      "type": "FXTDUpscaleTiled",
+      "pos": [
+        21226.32790869971,
+        -1278.4338616838497
+      ],
+      "size": [
+        278.46875,
+        372.65625
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "upscaled_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "tiles_processed",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDUpscaleTiled"
+      },
+      "widgets_values": [
+        2,
+        512,
+        64,
+        "lanczos",
+        0.3,
+        0.2,
+        true
+      ]
+    },
+    {
+      "id": 40,
+      "type": "FXTDUpscaleBySize",
+      "pos": [
+        21655.33169347568,
+        -1278.4338616838497
+      ],
+      "size": [
+        294.9375,
+        347.3125
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "upscaled_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "final_width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "final_height",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDUpscaleBySize"
+      },
+      "widgets_values": [
+        2048,
+        2048,
+        "lanczos",
+        true,
+        "fit",
+        0.2,
+        true
+      ]
+    },
+    {
+      "id": 41,
+      "type": "FXTDProUpscale",
+      "pos": [
+        22051.021990702997,
+        -2002.2226654251006
+      ],
+      "size": [
+        277.734375,
+        569.625
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "upscaled_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDProUpscale"
+      },
+      "widgets_values": [
+        2,
+        "Custom",
+        "lanczos",
+        0.3,
+        1,
+        0.2,
+        0.3,
+        "sRGB",
+        true,
+        false,
+        512,
+        64,
+        "32-bit Float"
+      ]
+    },
+    {
+      "id": 42,
+      "type": "FXTDFilmGrain",
+      "pos": [
+        21267.655726314475,
+        -781.6499851327312
+      ],
+      "size": [
+        280.265625,
+        524.3125
+      ],
+      "flags": {},
+      "order": 32,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "grained_image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDFilmGrain"
+      },
+      "widgets_values": [
+        "Custom",
+        "None",
+        1,
+        1,
+        0.3,
+        1,
+        1,
+        1,
+        1.5,
+        0.8,
+        0,
+        0,
+        "randomize",
+        true,
+        true
+      ]
+    },
+    {
+      "id": 43,
+      "type": "FXTDLensEffects",
+      "pos": [
+        22030.182766364418,
+        -1278.4338616838497
+      ],
+      "size": [
+        284.03125,
+        393.65625
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "processed_image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDLensEffects"
+      },
+      "widgets_values": [
+        "Custom",
+        1,
+        0.1,
+        0.25,
+        2,
+        0.1,
+        0.8,
+        0,
+        true,
+        true
+      ]
+    },
+    {
+      "id": 44,
+      "type": "FXTDFilmLook",
+      "pos": [
+        21630.80873486051,
+        -781.6499851327312
+      ],
+      "size": [
+        270,
+        394.96875
+      ],
+      "flags": {},
+      "order": 34,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "processed_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "look_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDFilmLook"
+      },
+      "widgets_values": [
+        "Custom",
+        "None",
+        "None",
+        1,
+        1,
+        1,
+        1,
+        0,
+        "randomize",
+        true
+      ]
+    },
+    {
+      "id": 45,
+      "type": "FXTDFilmGrainAdvanced",
+      "pos": [
+        22023.545242497654,
+        -781.6499851327312
+      ],
+      "size": [
+        294.1875,
+        747
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "grained_image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDFilmGrainAdvanced"
+      },
+      "widgets_values": [
+        0.15,
+        1,
+        0.5,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        0.3,
+        0,
+        0.8,
+        50,
+        1,
+        0.3,
+        0.2,
+        0,
+        "randomize",
+        true,
+        0.1
+      ]
+    },
+    {
+      "id": 46,
+      "type": "FXTDProFilmEffects",
+      "pos": [
+        22441.811697911216,
+        -2002.2226654251006
+      ],
+      "size": [
+        428.34375,
+        1593.578125
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "processed_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "effect_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDProFilmEffects"
+      },
+      "widgets_values": [
+        "35mm Clean",
+        1,
+        "None",
+        "None",
+        "None",
+        true,
+        0,
+        "randomize",
+        true,
+        true,
+        0.15,
+        1,
+        0.3,
+        1.5,
+        0.8,
+        true,
+        0.15,
+        0.75,
+        50,
+        1,
+        0.3,
+        0.2,
+        true,
+        0.1,
+        true,
+        0.08,
+        0.8,
+        30,
+        true,
+        0.25,
+        2,
+        1,
+        false,
+        0,
+        0,
+        false,
+        0.2,
+        0.6,
+        false,
+        2,
+        false,
+        "Unsharp Mask",
+        0.5,
+        1,
+        0
+      ]
+    },
+    {
+      "id": 47,
+      "type": "FXTDSaveEXR",
+      "pos": [
+        22955.129948944217,
+        -2002.2226654251006
+      ],
+      "size": [
+        400,
+        602.9375
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "file_paths",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "folder_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "frame_count",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDSaveEXR"
+      },
+      "widgets_values": [
+        "FXTD",
+        "16-bit Half Float",
+        "ZIP",
+        "sRGB",
+        "Linear",
+        "None",
+        false,
+        "",
+        1,
+        4,
+        true,
+        "",
+        "RGB"
+      ]
+    },
+    {
+      "id": 48,
+      "type": "FXTDSaveEXRMultiLayer",
+      "pos": [
+        21656.28386415614,
+        -186.961312986665
+      ],
+      "size": [
+        330.828125,
+        663.3125
+      ],
+      "flags": {},
+      "order": 38,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer_beauty",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_diffuse",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_specular",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_emission",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_normal",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_depth",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_alpha",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_ao",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_shadow",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_uv",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_motion",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_crypto",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_custom1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_custom2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_custom3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "file_path",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDSaveEXRMultiLayer"
+      },
+      "widgets_values": [
+        "multilayer.exr",
+        "16-bit Half Float",
+        "ZIP",
+        "custom1",
+        "custom2",
+        "custom3",
+        ""
+      ]
+    },
+    {
+      "id": 49,
+      "type": "FXTDSaveEXRSequence",
+      "pos": [
+        22978.027729333153,
+        -1278.4338616838497
+      ],
+      "size": [
+        321.875,
+        449.96875
+      ],
+      "flags": {},
+      "order": 39,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "first_frame",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "last_frame",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDSaveEXRSequence"
+      },
+      "widgets_values": [
+        "sequence",
+        "16-bit Half Float",
+        "ZIP",
+        "exr_sequences",
+        1001,
+        4,
+        true,
+        false,
+        "sRGB",
+        false
+      ]
+    },
+    {
+      "id": 50,
+      "type": "FXTDEXRChannelMerge",
+      "pos": [
+        21245.864361250504,
+        -175.6187379552282
+      ],
+      "size": [
+        319.953125,
+        459.3125
+      ],
+      "flags": {},
+      "order": 40,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "red_channel",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "green_channel",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "blue_channel",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "alpha_channel",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "depth_channel",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "normal_channel",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "custom_channel_1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "custom_channel_2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "file_path",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDEXRChannelMerge"
+      },
+      "widgets_values": [
+        "merged.exr",
+        "16-bit Half Float",
+        "ZIP",
+        "custom1",
+        "custom2",
+        ""
+      ]
+    },
+    {
+      "id": 51,
+      "type": "FXTDSaveEXRCryptomatte",
+      "pos": [
+        21206.112751080214,
+        524.0900322531052
+      ],
+      "size": [
+        337.59375,
+        280.65625
+      ],
+      "flags": {},
+      "order": 41,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "crypto_object",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "crypto_material",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "crypto_asset",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "depth",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "file_path",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDSaveEXRCryptomatte"
+      },
+      "widgets_values": [
+        "crypto.exr",
+        "ZIP",
+        ""
+      ]
+    },
+    {
+      "id": 52,
+      "type": "FXTDWhiteBalance",
+      "pos": [
+        23501.812497306753,
+        -1636.430263764363
+      ],
+      "size": [
+        282.765625,
+        270.65625
+      ],
+      "flags": {},
+      "order": 42,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDWhiteBalance"
+      },
+      "widgets_values": [
+        "Daylight (5500K)",
+        5500,
+        0,
+        5500,
+        1,
+        true
+      ]
+    },
+    {
+      "id": 53,
+      "type": "FXTDDepthOfField",
+      "pos": [
+        23022.746451929375,
+        -316.44040055441496
+      ],
+      "size": [
+        280.96875,
+        322.65625
+      ],
+      "flags": {},
+      "order": 43,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "depth_map",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDDepthOfField"
+      },
+      "widgets_values": [
+        5,
+        0.5,
+        0.1,
+        "Circle",
+        1,
+        true,
+        true
+      ]
+    },
+    {
+      "id": 54,
+      "type": "FXTDMotionBlur",
+      "pos": [
+        22036.33184243223,
+        80.06344576182869
+      ],
+      "size": [
+        270,
+        301.65625
+      ],
+      "flags": {},
+      "order": 44,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDMotionBlur"
+      },
+      "widgets_values": [
+        "Directional",
+        10,
+        0,
+        0.5,
+        0.5,
+        16,
+        true
+      ]
+    },
+    {
+      "id": 55,
+      "type": "FXTDRollingShutter",
+      "pos": [
+        23501.23519274555,
+        -2002.2226654251006
+      ],
+      "size": [
+        284.203125,
+        301.65625
+      ],
+      "flags": {},
+      "order": 45,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDRollingShutter"
+      },
+      "widgets_values": [
+        0,
+        "Vertical",
+        0,
+        0,
+        -1,
+        0.1,
+        true
+      ]
+    },
+    {
+      "id": 56,
+      "type": "FXTDRollingShutter",
+      "pos": [
+        23480.319371912603,
+        -1278.4338616838497
+      ],
+      "size": [
+        284.203125,
+        301.65625
+      ],
+      "flags": {},
+      "order": 46,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDRollingShutter"
+      },
+      "widgets_values": [
+        0,
+        "Vertical",
+        0,
+        0,
+        -1,
+        0.1,
+        true
+      ]
+    },
+    {
+      "id": 57,
+      "type": "FXTDCameraShake",
+      "pos": [
+        22479.783653130347,
+        -337.316628285055
+      ],
+      "size": [
+        284.28125,
+        330.65625
+      ],
+      "flags": {},
+      "order": 47,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDCameraShake"
+      },
+      "widgets_values": [
+        "Subtle Handheld",
+        2,
+        2,
+        0.5,
+        1,
+        0,
+        "randomize",
+        true,
+        true
+      ]
+    },
+    {
+      "id": 58,
+      "type": "FXTDCompressionArtifacts",
+      "pos": [
+        22987.196930442722,
+        -781.6499851327312
+      ],
+      "size": [
+        335.25,
+        269.65625
+      ],
+      "flags": {},
+      "order": 48,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDCompressionArtifacts"
+      },
+      "widgets_values": [
+        "JPEG",
+        50,
+        8,
+        true,
+        32,
+        0
+      ]
+    },
+    {
+      "id": 59,
+      "type": "FXTDPhysicalCamera",
+      "pos": [
+        23506.32339138654,
+        -781.6499851327312
+      ],
+      "size": [
+        298.6875,
+        867.59375
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 49,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "depth_map",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "camera_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDPhysicalCamera"
+      },
+      "widgets_values": [
+        "1/48",
+        "f/2.8",
+        800,
+        0,
+        "Full Frame (36x24mm)",
+        true,
+        "Daylight (5500K)",
+        5500,
+        0,
+        false,
+        0.5,
+        5,
+        "Circle",
+        false,
+        "Directional",
+        0,
+        false,
+        0,
+        0,
+        false,
+        "Subtle Handheld",
+        1,
+        true,
+        0,
+        "randomize"
+      ]
+    },
+    {
+      "id": 60,
+      "type": "FXTD_DepthMapGenerator",
+      "pos": [
+        22469.07689318348,
+        90.99186740502114
+      ],
+      "size": [
+        330.984375,
+        229.65625
+      ],
+      "flags": {},
+      "order": 50,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "depth_map",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTD_DepthMapGenerator"
+      },
+      "widgets_values": [
+        "Base (98M - Balanced)",
+        true,
+        false,
+        0,
+        true
+      ]
+    },
+    {
+      "id": 61,
+      "type": "FXTD_Radiance_Sampler_Pro",
+      "pos": [
+        21676.92660402386,
+        524.0900322531052
+      ],
+      "size": [
+        312.34375,
+        565.96875
+      ],
+      "flags": {},
+      "order": 51,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": null
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": null
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": null
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": null
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTD_Radiance_Sampler_Pro"
+      },
+      "widgets_values": [
+        0,
+        "randomize",
+        "🎨 Flux txt2img",
+        20,
+        1,
+        "euler",
+        "simple",
+        1,
+        1,
+        3.5,
+        0,
+        150,
+        true,
+        false
+      ]
+    },
+    {
+      "id": 62,
+      "type": "FXTDCinematicPromptEncoder",
+      "pos": [
+        22112.581375927886,
+        524.0900322531052
+      ],
+      "size": [
+        400,
+        763.21875
+      ],
+      "flags": {},
+      "order": 52,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": null
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDCinematicPromptEncoder"
+      },
+      "widgets_values": [
+        "A cinematic scene...",
+        "🎬 Classic Hollywood",
+        "Medium Shot (MS)",
+        "ARRI Alexa 35",
+        "50mm Standard Prime",
+        "f/2.8 (Cinematic Separation)",
+        "Cinematic Haze / Volumetric Fog",
+        "Photorealistic (Raw)",
+        "None",
+        "None",
+        "None",
+        "None",
+        "",
+        2024,
+        true,
+        0,
+        "Medium Shot (MS) of A cinematic scene.... Shot on ARRI Alexa 35. Cinematic Haze / Volumetric Fog. Photorealistic (Raw)",
+        null
+      ]
+    },
+    {
+      "id": 63,
+      "type": "FXTDHelp",
+      "pos": [
+        23532.394587651594,
+        152.3051808328055
+      ],
+      "size": [
+        270,
+        112.65625
+      ],
+      "flags": {},
+      "order": 53,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "trigger",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "status",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDHelp"
+      },
+      "widgets_values": [
+        "Full Documentation"
+      ]
+    },
+    {
+      "id": 64,
+      "type": "FXTD_DNA_Reader",
+      "pos": [
+        23021.8231910576,
+        368.48520016315297
+      ],
+      "size": [
+        423.984375,
+        139.5625
+      ],
+      "flags": {},
+      "order": 54,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "is_signed",
+          "type": "BOOLEAN",
+          "links": null
+        },
+        {
+          "name": "signature_data",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTD_DNA_Reader"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 65,
+      "type": "FXTDResolution",
+      "pos": [
+        23549.692346093747,
+        366.0912796694615
+      ],
+      "size": [
+        270,
+        499.28125
+      ],
+      "flags": {},
+      "order": 55,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": null
+        },
+        {
+          "name": "preview",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FXTDResolution"
+      },
+      "widgets_values": [
+        "FLUX 1MP Square",
+        "Flux / SD3",
+        "1.0",
+        1024,
+        1024,
+        "1:1",
+        false,
+        64,
+        1,
+        false
+      ]
+    }
+  ],
+  "links": [],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.4177248169415759,
+      "offset": [
+        -17858.92935361515,
+        3335.53432005769
+      ]
+    },
+    "frontendVersion": "1.35.9"
+  },
+  "version": 0.4
+}
