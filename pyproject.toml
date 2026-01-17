@@ -29,9 +29,9 @@ Documentation = "https://fxtd.org/radiance_docs/"
 "Bug Tracker" = "https://fxtd.org/radiance_docs/faq.html"
 
 [tool.comfy]
-PublisherId = ""
+PublisherId = "fxtdstudios"
 DisplayName = "radiance"
-Icon = ""
+Icon = "docs/FLOGO.png"
 includes = [] 
 # "requires-comfyui" = ">=1.0.0"  # ComfyUI version compatibility
 
