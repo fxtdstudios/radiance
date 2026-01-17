@@ -348,7 +348,7 @@ GPL-3.0 License - See [LICENSE](LICENSE)
 
 **Created by**
 
-- FXTD Studios
+FXTD Studios
 
 ---
 
