@@ -35,7 +35,7 @@
 
 ### Option 1: ComfyUI Manager (Recommended)
 1. Open ComfyUI Manager
-2. Search for "fxtdstudio-radiance"
+2. Search for "radiance"
 3. Click Install
 
 ### Option 2: Git Clone
@@ -272,27 +272,31 @@ All critical operations are GPU-accelerated with automatic CPU fallback:
 
 ---
 
-## Requirements
+## External Libraries
 
-- [opencv-python](https://pypi.org/project/opencv-python/)
-- [imageio](https://imageio.readthedocs.io/)
-- [OpenEXR](https://pypi.org/project/OpenEXR/)
-- [Imath](https://pypi.org/project/Imath/)
-- [opencolorio](https://opencolorio.org/)
-- [colour-science](https://www.colour-science.org/)
-- [transformers](https://huggingface.co/docs/transformers/index)
+Radiance is built on industry-standard open source libraries:
+
+- **[OpenColorIO (OCIO)](https://opencolorio.org/)**: Standard color management
+- **[OpenEXR](https://openexr.com/)**: Professional HDR image format
+- **[colour-science](https://www.colour-science.org/)**: Comprehensive color science for Python
+- **[PyTorch](https://pytorch.org/)**: GPU acceleration and tensor operations
+- **[OpenCV](https://opencv.org/)**: Real-time computer vision library
 
 ---
 
 ## Documentation
 
-- [Official Documentation](https://fxtd.org/radiance_docs/)
+- **[Official Documentation](https://fxtd.org/radiance_docs/)**
+- **Website**: [www.fxtd.org](https://www.fxtd.org)
+- **LinkedIn**: [FXTD Studios](https://www.linkedin.com/company/fxtd-studios)
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md).
+We welcome contributions from the community! Whether it's adding new features, fixing bugs, or improving documentation, your help is appreciated.
+
+Please check our [Contributing Guide](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and code of conduct.
 
 ---
 
