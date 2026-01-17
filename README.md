@@ -288,7 +288,7 @@ Radiance is built on industry-standard open source libraries:
 
 - **[Official Documentation](https://fxtd.org/radiance_docs/)**
 - **Website**: [www.fxtd.org](https://www.fxtd.org)
-- **LinkedIn**: [FXTD Studios](https://www.linkedin.com/company/fxtd-studios)
+- **LinkedIn**: [FXTD Studios](https://www.linkedin.com/company/fxtdstudios)
 
 ---
 
@@ -308,9 +308,6 @@ GPL-3.0 License - See [LICENSE](LICENSE)
 
 ## Credits
 
-**Created by**
-
-- FXTD Studios
 
 **Core Technology**
 
@@ -347,6 +344,11 @@ GPL-3.0 License - See [LICENSE](LICENSE)
 - JavaScript Canvas API
 - WebGL (planned)
 - HiDPI/Retina rendering
+
+
+**Created by**
+
+- FXTD Studios
 
 ---
 
