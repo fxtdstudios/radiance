@@ -41,7 +41,7 @@
 ### Option 2: Git Clone
 ```bash
 cd ComfyUI/custom_nodes
-git clone https://github.com/FXTDStudio/radiance.git
+git clone https://github.com/fxtdstudios/radiance.git
 pip install -r FXTDStudio_Radiance/requirements.txt
 ```
 
