@@ -1046,8 +1046,12 @@ class SaveImageEXR(FXTDSignatureMixin):
 
 class LoadImageEXR:
     """
-    Load EXR files with full HDR data preservation.
+    Load EXR/HDR files with full HDR data preservation.
     Supports 16-bit and 32-bit float EXR files.
+    
+    Two input methods:
+    1. file_path: Enter the full path to any EXR/HDR file on your system
+    2. image: Select from EXR/HDR files already in ComfyUI's input folder
     """
     
     @classmethod
@@ -1055,15 +1059,35 @@ class LoadImageEXR:
         import folder_paths
         input_dir = folder_paths.get_input_directory()
         files = []
-        for f in os.listdir(input_dir):
-            if f.lower().endswith(('.exr', '.hdr')):
-                files.append(f)
+        try:
+            for f in os.listdir(input_dir):
+                if f.lower().endswith(('.exr', '.hdr')):
+                    files.append(f)
+        except Exception:
+            pass
+        
+        # Build file list with "none" as first option
+        file_options = ["-- Select from input folder --"] + sorted(files) if files else ["-- No EXR files in input folder --"]
+            
         return {
             "required": {
-                "image": (sorted(files) if files else ["none"], {"image_upload": True}),
+                "file_path": ("STRING", {
+                    "default": "", 
+                    "multiline": False,
+                    "tooltip": "Full path to EXR/HDR file (e.g., C:/images/my_image.exr). Leave empty to use dropdown."
+                }),
             },
             "optional": {
-                "exposure_adjust": ("FLOAT", {"default": 0.0, "min": -10.0, "max": 10.0, "step": 0.1}),
+                "input_folder_file": (file_options, {
+                    "tooltip": "Select EXR/HDR from ComfyUI's input folder. Only used if file_path is empty."
+                }),
+                "exposure_adjust": ("FLOAT", {
+                    "default": 0.0, 
+                    "min": -10.0, 
+                    "max": 10.0, 
+                    "step": 0.1,
+                    "tooltip": "Adjust exposure in stops (EV). Positive = brighter, negative = darker."
+                }),
             }
         }
     
@@ -1071,39 +1095,194 @@ class LoadImageEXR:
     RETURN_NAMES = ("image", "metadata")
     FUNCTION = "load"
     CATEGORY = "FXTD Studios/Radiance/Color"
-    DESCRIPTION = "Load EXR/HDR files with full dynamic range preservation."
+    DESCRIPTION = "Load EXR/HDR files with full HDR dynamic range. Enter file path directly or select from input folder."
     
     @classmethod
-    def IS_CHANGED(cls, image, **kwargs):
-        import folder_paths
-        image_path = folder_paths.get_annotated_filepath(image)
-        return os.path.getmtime(image_path)
+    def IS_CHANGED(cls, file_path, **kwargs):
+        # Determine which path to use
+        actual_path = cls._get_actual_path(file_path, kwargs.get("input_folder_file", ""))
+        if not actual_path:
+            return float("nan")
+        try:
+            if os.path.exists(actual_path):
+                return os.path.getmtime(actual_path)
+        except Exception:
+            pass
+        return float("nan")
     
     @classmethod
-    def VALIDATE_INPUTS(cls, image, **kwargs):
+    def _get_actual_path(cls, file_path: str, input_folder_file: str) -> str:
+        """Determine the actual file path to load."""
         import folder_paths
-        if not folder_paths.exists_annotated_filepath(image):
-            return f"Invalid image file: {image}"
+        
+        # Priority 1: Direct file path if provided
+        if file_path and file_path.strip():
+            # Strip whitespace and quotes (users often paste paths with quotes)
+            cleaned_path = file_path.strip().strip('"').strip("'").strip()
+            if cleaned_path:
+                return cleaned_path
+        
+        # Priority 2: Input folder selection
+        if input_folder_file and not input_folder_file.startswith("--"):
+            return folder_paths.get_annotated_filepath(input_folder_file)
+        
+        return ""
+    
+    @classmethod
+    def VALIDATE_INPUTS(cls, file_path, **kwargs):
+        input_folder_file = kwargs.get("input_folder_file", "")
+        
+        actual_path = cls._get_actual_path(file_path, input_folder_file)
+        
+        if not actual_path:
+            return "No file specified. Either enter a file path OR select a file from the input folder dropdown."
+        
+        if not os.path.exists(actual_path):
+            return f"File not found: '{actual_path}'"
+        
+        if not actual_path.lower().endswith(('.exr', '.hdr')):
+            return f"Invalid file type. Only .exr and .hdr files are supported. Got: '{actual_path}'"
+        
         return True
     
-    def load(self, image: str, exposure_adjust: float = 0.0) -> Tuple[torch.Tensor, str]:
-        import cv2
-        import folder_paths
+    def load(self, file_path: str, input_folder_file: str = "", exposure_adjust: float = 0.0) -> Tuple[torch.Tensor, str]:
+        """Load EXR/HDR file using multiple backends for maximum compatibility."""
         
-        image_path = folder_paths.get_annotated_filepath(image)
+        # Get the actual path to load
+        actual_path = self._get_actual_path(file_path, input_folder_file)
         
-        # Load with OpenCV (supports EXR natively with OPENCV_IO_ENABLE_OPENEXR)
-        img = cv2.imread(image_path, cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
+        if not actual_path:
+            raise ValueError("No file path specified. Enter a file path or select from dropdown.")
+        
+        if not os.path.exists(actual_path):
+            raise FileNotFoundError(f"File not found: {actual_path}")
+        
+        img = None
+        load_method = "unknown"
+        
+        # Method 0: Try OpenEXR library (most reliable, just installed)
+        try:
+            import OpenEXR
+            import Imath
+            
+            exr_file = OpenEXR.InputFile(actual_path)
+            header = exr_file.header()
+            
+            dw = header['dataWindow']
+            width = dw.max.x - dw.min.x + 1
+            height = dw.max.y - dw.min.y + 1
+            
+            # Get channel names
+            channels = list(header['channels'].keys())
+            
+            # Read pixel data
+            pt = Imath.PixelType(Imath.PixelType.FLOAT)
+            
+            if 'R' in channels and 'G' in channels and 'B' in channels:
+                # RGB or RGBA
+                r_str = exr_file.channel('R', pt)
+                g_str = exr_file.channel('G', pt)
+                b_str = exr_file.channel('B', pt)
+                
+                r = np.frombuffer(r_str, dtype=np.float32).reshape(height, width)
+                g = np.frombuffer(g_str, dtype=np.float32).reshape(height, width)
+                b = np.frombuffer(b_str, dtype=np.float32).reshape(height, width)
+                
+                if 'A' in channels:
+                    a_str = exr_file.channel('A', pt)
+                    a = np.frombuffer(a_str, dtype=np.float32).reshape(height, width)
+                    img = np.stack([r, g, b, a], axis=-1)
+                else:
+                    img = np.stack([r, g, b], axis=-1)
+            elif 'Y' in channels:
+                # Grayscale
+                y_str = exr_file.channel('Y', pt)
+                img = np.frombuffer(y_str, dtype=np.float32).reshape(height, width, 1)
+            else:
+                # Use first available channel
+                ch_name = channels[0]
+                ch_str = exr_file.channel(ch_name, pt)
+                img = np.frombuffer(ch_str, dtype=np.float32).reshape(height, width, 1)
+            
+            exr_file.close()
+            load_method = "OpenEXR"
+        except ImportError:
+            pass
+        except Exception as e:
+            print(f"[LoadImageEXR] OpenEXR library failed: {e}")
+        
+        # Method 1: Try imageio (good compatibility)
+        if img is None:
+            try:
+                import imageio.v3 as iio
+                img = iio.imread(actual_path)
+                load_method = "imageio"
+            except ImportError:
+                pass
+            except Exception as e:
+                print(f"[LoadImageEXR] imageio failed: {e}")
+        
+        # Method 2: Try OpenImageIO (industry standard)
+        if img is None:
+            try:
+                import OpenImageIO as oiio
+                inp = oiio.ImageInput.open(actual_path)
+                if inp:
+                    spec = inp.spec()
+                    img = np.zeros((spec.height, spec.width, spec.nchannels), dtype=np.float32)
+                    inp.read_image(0, 0, oiio.FLOAT, img)
+                    inp.close()
+                    load_method = "OpenImageIO"
+            except ImportError:
+                pass
+            except Exception as e:
+                print(f"[LoadImageEXR] OpenImageIO failed: {e}")
+        
+        # Method 3: Try OpenCV (may not have EXR support)
+        if img is None:
+            try:
+                import cv2
+                # Enable OpenEXR if available
+                os.environ['OPENCV_IO_ENABLE_OPENEXR'] = '1'
+                img = cv2.imread(actual_path, cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
+                if img is not None:
+                    # Convert BGR to RGB
+                    if len(img.shape) == 3:
+                        if img.shape[2] == 4:
+                            img = cv2.cvtColor(img, cv2.COLOR_BGRA2RGBA)
+                        elif img.shape[2] >= 3:
+                            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                    load_method = "OpenCV"
+            except Exception as e:
+                print(f"[LoadImageEXR] OpenCV failed: {e}")
+        
+        # Method 4: Try pyexr
+        if img is None:
+            try:
+                import pyexr
+                img = pyexr.read(actual_path)
+                load_method = "pyexr"
+            except ImportError:
+                pass
+            except Exception as e:
+                print(f"[LoadImageEXR] pyexr failed: {e}")
         
         if img is None:
-            raise ValueError(f"Could not load image: {image_path}")
-        
-        # Convert BGR to RGB
-        if len(img.shape) == 3 and img.shape[2] >= 3:
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            raise RuntimeError(
+                f"Failed to load EXR file: {actual_path}\n\n"
+                "Please install one of these packages:\n"
+                "  pip install imageio[pyav]\n"
+                "  pip install imageio-ffmpeg\n"
+                "  pip install pyexr\n"
+                "  pip install OpenImageIO\n"
+            )
         
         # Ensure float32
-        img = img.astype(np.float32)
+        img = np.asarray(img, dtype=np.float32)
+        
+        # Handle 2D grayscale images
+        if len(img.shape) == 2:
+            img = img[:, :, np.newaxis]
         
         # Apply exposure adjustment
         if exposure_adjust != 0:
@@ -1112,15 +1291,26 @@ class LoadImageEXR:
         # Build metadata
         h, w = img.shape[:2]
         channels = img.shape[2] if len(img.shape) == 3 else 1
+        
+        # Calculate dynamic range safely
+        min_val = float(img.min())
+        max_val = float(img.max())
+        if min_val > 0 and max_val > 0:
+            dynamic_range = float(np.log2(max_val / min_val))
+        else:
+            dynamic_range = 0.0
+            
         metadata = {
-            "file": os.path.basename(image_path),
+            "file": os.path.basename(actual_path),
+            "path": actual_path,
             "width": w,
             "height": h,
             "channels": channels,
             "dtype": str(img.dtype),
-            "min": float(img.min()),
-            "max": float(img.max()),
-            "dynamic_range_stops": float(np.log2(img.max() / (img.min() + 1e-10) + 1e-10))
+            "min": min_val,
+            "max": max_val,
+            "dynamic_range_stops": dynamic_range,
+            "load_method": load_method
         }
         
         metadata_str = json.dumps(metadata, indent=2)
