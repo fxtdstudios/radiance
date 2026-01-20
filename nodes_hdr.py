@@ -1317,6 +1317,276 @@ class LoadImageEXR:
         
         return (numpy_to_tensor_float32(img), metadata_str)
 
+
+class LoadImageEXRSequence:
+    """
+    Load EXR/HDR image sequences from a folder.
+    Supports VFX-standard naming conventions and frame range selection.
+    
+    Examples of supported patterns:
+    - render.0001.exr, render.0002.exr, ...
+    - frame_001.exr, frame_002.exr, ...
+    - image0001.exr, image0002.exr, ...
+    """
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Any]:
+        return {
+            "required": {
+                "folder_path": ("STRING", {
+                    "default": "",
+                    "multiline": False,
+                    "tooltip": "Full path to folder containing EXR sequence (e.g., C:/renders/sequence/)"
+                }),
+            },
+            "optional": {
+                "file_pattern": ("STRING", {
+                    "default": "*.exr",
+                    "multiline": False,
+                    "tooltip": "File pattern to match (e.g., *.exr, render.*.exr, frame_????.exr)"
+                }),
+                "start_frame": ("INT", {
+                    "default": 0,
+                    "min": 0,
+                    "max": 999999,
+                    "tooltip": "First frame to load (0 = from beginning)"
+                }),
+                "end_frame": ("INT", {
+                    "default": 0,
+                    "min": 0,
+                    "max": 999999,
+                    "tooltip": "Last frame to load (0 = to end)"
+                }),
+                "frame_step": ("INT", {
+                    "default": 1,
+                    "min": 1,
+                    "max": 100,
+                    "tooltip": "Load every Nth frame"
+                }),
+                "max_frames": ("INT", {
+                    "default": 0,
+                    "min": 0,
+                    "max": 10000,
+                    "tooltip": "Maximum frames to load (0 = no limit). Useful to avoid memory issues."
+                }),
+                "exposure_adjust": ("FLOAT", {
+                    "default": 0.0,
+                    "min": -10.0,
+                    "max": 10.0,
+                    "step": 0.1,
+                    "tooltip": "Adjust exposure in stops (EV)"
+                }),
+            }
+        }
+    
+    RETURN_TYPES = ("IMAGE", "STRING", "INT")
+    RETURN_NAMES = ("images", "metadata", "frame_count")
+    FUNCTION = "load_sequence"
+    CATEGORY = "FXTD Studios/Radiance/Color"
+    DESCRIPTION = "Load EXR/HDR image sequence from a folder. Returns a batch of images."
+    
+    @classmethod
+    def IS_CHANGED(cls, folder_path, **kwargs):
+        folder_path = folder_path.strip().strip('"').strip("'")
+        if not folder_path or not os.path.isdir(folder_path):
+            return float("nan")
+        try:
+            return os.path.getmtime(folder_path)
+        except Exception:
+            return float("nan")
+    
+    @classmethod
+    def VALIDATE_INPUTS(cls, folder_path, **kwargs):
+        folder_path = folder_path.strip().strip('"').strip("'")
+        if not folder_path:
+            return "No folder path specified."
+        if not os.path.isdir(folder_path):
+            return f"Folder not found: '{folder_path}'"
+        return True
+    
+    def _load_single_exr(self, file_path: str) -> np.ndarray:
+        """Load a single EXR file using the best available method."""
+        img = None
+        
+        # Method 1: OpenEXR library
+        try:
+            import OpenEXR
+            import Imath
+            
+            exr_file = OpenEXR.InputFile(file_path)
+            header = exr_file.header()
+            
+            dw = header['dataWindow']
+            width = dw.max.x - dw.min.x + 1
+            height = dw.max.y - dw.min.y + 1
+            
+            channels = list(header['channels'].keys())
+            pt = Imath.PixelType(Imath.PixelType.FLOAT)
+            
+            if 'R' in channels and 'G' in channels and 'B' in channels:
+                r_str = exr_file.channel('R', pt)
+                g_str = exr_file.channel('G', pt)
+                b_str = exr_file.channel('B', pt)
+                
+                r = np.frombuffer(r_str, dtype=np.float32).reshape(height, width)
+                g = np.frombuffer(g_str, dtype=np.float32).reshape(height, width)
+                b = np.frombuffer(b_str, dtype=np.float32).reshape(height, width)
+                
+                if 'A' in channels:
+                    a_str = exr_file.channel('A', pt)
+                    a = np.frombuffer(a_str, dtype=np.float32).reshape(height, width)
+                    img = np.stack([r, g, b, a], axis=-1)
+                else:
+                    img = np.stack([r, g, b], axis=-1)
+            else:
+                ch_name = channels[0] if channels else 'Y'
+                ch_str = exr_file.channel(ch_name, pt)
+                img = np.frombuffer(ch_str, dtype=np.float32).reshape(height, width, 1)
+            
+            exr_file.close()
+            return img
+        except Exception:
+            pass
+        
+        # Method 2: imageio
+        if img is None:
+            try:
+                import imageio.v3 as iio
+                img = iio.imread(file_path)
+                return np.asarray(img, dtype=np.float32)
+            except Exception:
+                pass
+        
+        # Method 3: OpenCV
+        if img is None:
+            try:
+                import cv2
+                os.environ['OPENCV_IO_ENABLE_OPENEXR'] = '1'
+                img = cv2.imread(file_path, cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
+                if img is not None:
+                    if len(img.shape) == 3 and img.shape[2] >= 3:
+                        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                    return img.astype(np.float32)
+            except Exception:
+                pass
+        
+        return None
+    
+    def load_sequence(self, folder_path: str, file_pattern: str = "*.exr",
+                      start_frame: int = 0, end_frame: int = 0,
+                      frame_step: int = 1, max_frames: int = 0,
+                      exposure_adjust: float = 0.0) -> Tuple[torch.Tensor, str, int]:
+        """Load EXR sequence from folder."""
+        import glob
+        import re
+        
+        # Clean path
+        folder_path = folder_path.strip().strip('"').strip("'")
+        
+        if not os.path.isdir(folder_path):
+            raise ValueError(f"Folder not found: {folder_path}")
+        
+        # Find matching files
+        pattern = os.path.join(folder_path, file_pattern)
+        files = glob.glob(pattern)
+        
+        if not files:
+            raise ValueError(f"No files matching pattern '{file_pattern}' in folder: {folder_path}")
+        
+        # Sort files naturally (handle frame numbers correctly)
+        def natural_sort_key(s):
+            return [int(text) if text.isdigit() else text.lower()
+                    for text in re.split('([0-9]+)', s)]
+        
+        files = sorted(files, key=natural_sort_key)
+        
+        # Apply frame range
+        if start_frame > 0:
+            files = files[start_frame:]
+        if end_frame > 0 and end_frame < len(files) + start_frame:
+            files = files[:end_frame - start_frame + 1]
+        
+        # Apply frame step
+        if frame_step > 1:
+            files = files[::frame_step]
+        
+        # Apply max frames limit
+        if max_frames > 0:
+            files = files[:max_frames]
+        
+        if not files:
+            raise ValueError("No frames to load after applying range/step filters.")
+        
+        print(f"[LoadImageEXRSequence] Loading {len(files)} frames from {folder_path}")
+        
+        # Load all frames
+        images = []
+        loaded_files = []
+        
+        for i, file_path in enumerate(files):
+            try:
+                img = self._load_single_exr(file_path)
+                if img is not None:
+                    # Handle 2D grayscale
+                    if len(img.shape) == 2:
+                        img = img[:, :, np.newaxis]
+                    
+                    # Apply exposure adjustment
+                    if exposure_adjust != 0:
+                        img = img * (2.0 ** exposure_adjust)
+                    
+                    images.append(img)
+                    loaded_files.append(os.path.basename(file_path))
+                    
+                    if (i + 1) % 10 == 0:
+                        print(f"[LoadImageEXRSequence] Loaded {i + 1}/{len(files)} frames")
+            except Exception as e:
+                print(f"[LoadImageEXRSequence] Warning: Failed to load {file_path}: {e}")
+        
+        if not images:
+            raise RuntimeError("Failed to load any frames from the sequence.")
+        
+        # Stack into batch tensor
+        # Ensure all images have same dimensions
+        h, w, c = images[0].shape
+        valid_images = []
+        for img in images:
+            if img.shape[:2] == (h, w):
+                # Ensure same channel count
+                if img.shape[2] != c:
+                    if img.shape[2] < c:
+                        padding = np.ones((*img.shape[:2], c - img.shape[2]), dtype=np.float32)
+                        img = np.concatenate([img, padding], axis=-1)
+                    else:
+                        img = img[:, :, :c]
+                valid_images.append(img)
+        
+        # Stack to batch
+        batch = np.stack(valid_images, axis=0)
+        
+        # Build metadata
+        metadata = {
+            "folder": folder_path,
+            "pattern": file_pattern,
+            "frame_count": len(valid_images),
+            "files": loaded_files[:10] + (["..."] if len(loaded_files) > 10 else []),
+            "width": w,
+            "height": h,
+            "channels": c,
+            "total_found": len(files),
+            "start_frame": start_frame,
+            "end_frame": end_frame,
+        }
+        
+        metadata_str = json.dumps(metadata, indent=2)
+        
+        print(f"[LoadImageEXRSequence] Done. Loaded {len(valid_images)} frames ({w}x{h}x{c})")
+        
+        # Convert to tensor: (B, H, W, C)
+        tensor_batch = torch.from_numpy(batch).float()
+        
+        return (tensor_batch, metadata_str, len(valid_images))
+
 class SaveImage16bit:
     """
     Save images as 16-bit PNG or TIFF for wider compatibility.
@@ -3818,6 +4088,7 @@ NODE_CLASS_MAPPINGS = {
     "ColorSpaceConvert": ColorSpaceConvert,
     "SaveImageEXR": SaveImageEXR,
     "LoadImageEXR": LoadImageEXR,
+    "LoadImageEXRSequence": LoadImageEXRSequence,
     "SaveImage16bit": SaveImage16bit,
     "HDRHistogram": HDRHistogram,
     "LogCurveEncode": LogCurveEncode,
@@ -3844,6 +4115,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ColorSpaceConvert": "🔄 Radiance Color Space Convert",
     "SaveImageEXR": "💾 Radiance Save EXR (32-bit)",
     "LoadImageEXR": "📂 Radiance Load EXR",
+    "LoadImageEXRSequence": "📂 Radiance Load EXR Sequence",
     "SaveImage16bit": "💾 Radiance Save 16-bit PNG/TIFF",
     "HDRHistogram": "📊 Radiance HDR Histogram",
     "LogCurveEncode": "📈 Radiance Log Curve Encode",
