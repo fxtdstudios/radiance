@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - FXTD Radiance</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* ComfyUI Dark Theme */
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #202020;
+            --bg-card: rgba(35, 35, 35, 0.95);
+            --bg-glass: rgba(255, 255, 255, 0.02);
+            --text-primary: #e0e0e0;
+            --text-secondary: #888888;
+            --text-muted: #666666;
+            --accent-gold: #888888;
+            --accent-amber: #999999;
+            --accent-teal: #aaaaaa;
+            --accent-violet: #888888;
+            --accent-coral: #999999;
+            --gradient-gold: linear-gradient(135deg, #666 0%, #555 100%);
+            --gradient-glow: none;
+            --border-default: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(255, 255, 255, 0.2);
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .back-link:hover {
+            color: var(--accent-gold);
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        header .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Search Box */
+        .search-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Category Navigation */
+        .category-nav {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .category-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            margin-bottom: 3rem;
+        }
+
+        .faq-section h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-default);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* FAQ Item */
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .faq-question:hover {
+            background: var(--bg-glass);
+        }
+
+        .faq-question h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .faq-question .icon {
+            color: var(--accent-gold);
+            font-size: 1.25rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.open .faq-question .icon {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            display: none;
+            padding: 0 1.25rem 1.25rem;
+            color: var(--text-secondary);
+        }
+
+        .faq-item.open .faq-answer {
+            display: block;
+        }
+
+        .faq-answer p {
+            margin-bottom: 0.75rem;
+        }
+
+        .faq-answer ul {
+            margin-left: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .faq-answer li {
+            margin-bottom: 0.25rem;
+        }
+
+        .faq-answer code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(212, 168, 83, 0.15);
+            color: var(--accent-gold);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .faq-answer pre {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 0.75rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        /* Solution Box */
+        .solution {
+            background: rgba(45, 212, 191, 0.08);
+            border: 1px solid rgba(45, 212, 191, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .solution h4 {
+            color: var(--accent-teal);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Warning Box */
+        .warning {
+            background: rgba(255, 107, 91, 0.08);
+            border: 1px solid rgba(255, 107, 91, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .warning h4 {
+            color: var(--accent-coral);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Quick Links */
+        .quick-links {
+            background: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-links h3 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .quick-link:hover {
+            color: var(--accent-gold);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer .brand {
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        footer a {
+            color: var(--accent-gold);
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Documentation Navigation -->
+    <!-- Documentation Navigation -->
+    <nav
+        style="background: #252525; border-bottom: 1px solid #333; padding: 0.75rem 2rem; position: sticky; top: 0; z-index: 100;">
+        <div
+            style="max-width: 1440px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <a href="index.html" style="text-decoration: none; color: #e0e0e0; font-weight: 600; font-size: 1.2rem;">
+                Radiance
+            </a>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <a href="index.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Overview</a>
+                <a href="installation.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Installation</a>
+                <a href="node_reference.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Nodes</a>
+                <a href="radiance_viewer.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Viewer</a>
+                <a href="tutorials.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Tutorials</a>
+                <a href="faq.html"
+                    style="color: #fff; text-decoration: none; padding: 0.35rem 0.75rem; background: #444; border-radius: 4px; font-size: 0.9rem;">FAQ</a>
+                <a href="changelog.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Changelog</a>
+                <button id="themeToggle" class="theme-toggle"
+                    style="background: #333; border: 1px solid #444; border-radius: 4px; padding: 0.35rem 0.75rem; color: #888; cursor: pointer; font-size: 0.85rem;">☀
+                    Light</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <h1>❓ FAQ & Troubleshooting</h1>
+            <p class="subtitle">Common questions and solutions for FXTD Studio Radiance</p>
+        </header>
+
+        <!-- Quick Links -->
+        <div class="quick-links">
+            <h3>Quick Links</h3>
+            <div class="quick-links-grid">
+                <a href="#installation" class="quick-link">📦 Installation Issues</a>
+                <a href="#gpu" class="quick-link">🎮 GPU Problems</a>
+                <a href="#color" class="quick-link">🎨 Color & Image</a>
+                <a href="#exr" class="quick-link">💾 EXR/Export</a>
+                <a href="#sampler" class="quick-link">⚡ Sampler</a>
+                <a href="#viewer" class="quick-link">👁️ Radiance Pro Viewer</a>
+            </div>
+        </div>
+
+        <!-- Category Navigation -->
+        <div class="category-nav">
+            <a href="#installation" class="category-btn">Installation</a>
+            <a href="#gpu" class="category-btn">GPU/Performance</a>
+            <a href="#color" class="category-btn">Color/Image</a>
+            <a href="#exr" class="category-btn">EXR/Export</a>
+            <a href="#sampler" class="category-btn">Sampling</a>
+            <a href="#viewer" class="category-btn">Viewer</a>
+        </div>
+
+        <!-- Installation Section -->
+        <section class="faq-section" id="installation">
+            <h2>📦 Installation</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Nodes not appearing in ComfyUI</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>If FXTD Radiance nodes don't appear in the node menu:</p>
+                    <ul>
+                        <li><strong>Restart ComfyUI completely</strong> — Not just refresh, but fully restart</li>
+                        <li>Check the console for error messages during startup</li>
+                        <li>Verify the folder is in <code>custom_nodes/FXTDStudio_Radiance/</code></li>
+                        <li>Make sure <code>__init__.py</code> exists in the folder</li>
+                    </ul>
+                    <div class="solution">
+                        <h4>✅ Quick Check</h4>
+                        <p>Look for this message in the ComfyUI console:</p>
+                        <pre>[FXTDStudio Radiance] Loaded 50+ nodes (v1.0.0)</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Missing dependencies error</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>If you see "ModuleNotFoundError" in the console:</p>
+                    <div class="solution">
+                        <h4>✅ Install Dependencies</h4>
+                        <pre>cd custom_nodes/FXTDStudio_Radiance
+pip install -r requirements.txt</pre>
+                    </div>
+                    <p>Common missing modules:</p>
+                    <ul>
+                        <li><code>colour-science</code> — For advanced color transforms</li>
+                        <li><code>opencv-python</code> — For image I/O including EXR</li>
+                        <li><code>scipy</code> — For signal processing functions</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>"colour-science not found" warning</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>This is just a <strong>warning</strong>, not an error. Most nodes will work fine without it.</p>
+                    <p>colour-science is only needed for:</p>
+                    <ul>
+                        <li>Advanced ACES transforms</li>
+                        <li>Precise chromatic adaptation</li>
+                        <li>spectral color science operations</li>
+                    </ul>
+                    <div class="solution">
+                        <h4>✅ Install (optional)</h4>
+                        <pre>pip install colour-science</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GPU Section -->
+        <section class="faq-section" id="gpu">
+            <h2>🎮 GPU & Performance</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>GPU acceleration not working</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>If nodes are running slowly or falling back to CPU:</p>
+                    <ul>
+                        <li>Ensure CUDA is installed and PyTorch can see your GPU</li>
+                        <li>Check that <code>use_gpu</code> is enabled on nodes that have it</li>
+                        <li>Your GPU memory might be full from other operations</li>
+                    </ul>
+                    <div class="solution">
+                        <h4>✅ Check GPU Status</h4>
+                        <p>Run in Python console:</p>
+                        <pre>import torch
+print(f"CUDA available: {torch.cuda.is_available()}")
+print(f"Device: {torch.cuda.get_device_name(0)}")</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Out of memory (OOM) errors</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>If you're getting CUDA out of memory errors:</p>
+                    <ul>
+                        <li>Reduce image resolution during processing</li>
+                        <li>Enable <strong>tile processing</strong> on upscale nodes</li>
+                        <li>Process one image at a time (batch size 1)</li>
+                        <li>Close other GPU-intensive applications</li>
+                    </ul>
+                    <div class="solution">
+                        <h4>✅ Use Tiled Processing</h4>
+                        <p>In upscale nodes, set:</p>
+                        <ul>
+                            <li><code>use_tiles: true</code></li>
+                            <li><code>tile_size: 512</code></li>
+                            <li><code>tile_overlap: 64</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Nodes are slow even with GPU</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Some operations are inherently CPU-bound:</p>
+                    <ul>
+                        <li>EXR file saving (disk I/O)</li>
+                        <li>LUT loading (file parsing)</li>
+                        <li>First run (compilation/warmup)</li>
+                    </ul>
+                    <p><strong>Expected performance:</strong> Most GPU operations should be 20-50x faster than CPU.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Color Section -->
+        <section class="faq-section" id="color">
+            <h2>🎨 Color & Image Quality</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>My image looks flat and washed out</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>This is likely log-encoded footage!</strong></p>
+                    <p>If you've used LogC encoding, the image is supposed to look flat. This preserves maximum dynamic
+                        range for color grading in DaVinci Resolve or other NLEs.</p>
+                    <div class="warning">
+                        <h4>⚠️ Never judge quality from log images</h4>
+                        <p>Log footage must be viewed with the correct color transform applied in your grading software.
+                        </p>
+                    </div>
+                    <div class="solution">
+                        <h4>✅ To preview correctly</h4>
+                        <ul>
+                            <li>Add a <strong>Log Curve Decode</strong> node before preview</li>
+                            <li>Or use the <strong>HDR Tone Map</strong> node with ACES Filmic</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Colors are clipping in highlights</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Standard 8-bit images clip at 1.0. For HDR workflows:</p>
+                    <ul>
+                        <li>Use <strong>Image to Float32</strong> early in your pipeline</li>
+                        <li>Enable <strong>HDR Expand Dynamic Range</strong> for more headroom</li>
+                        <li>Export as 16-bit or 32-bit EXR</li>
+                    </ul>
+                    <div class="solution">
+                        <h4>✅ Use False Color to check</h4>
+                        <p>Press <kbd>E</kbd> in Radiance Pro Viewer to enable false color. Red areas are clipped!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Film grain looks artificial</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>For more realistic grain:</p>
+                    <ul>
+                        <li>Lower the <code>grain_intensity</code> — less is more</li>
+                        <li>Increase <code>grain_softness</code> for a more organic look</li>
+                        <li>Match your subject: use lower grain for clean subjects, higher for gritty scenes</li>
+                        <li>Combine with subtle halation for authenticity</li>
+                    </ul>
+                    <div class="solution">
+                        <h4>✅ Recommended starting point</h4>
+                        <pre>grain_intensity: 0.15
+grain_size: 0.8
+grain_softness: 0.4
+halation: 0.1</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EXR Section -->
+        <section class="faq-section" id="exr">
+            <h2>💾 EXR & Export</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>EXR files not saving</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>EXR export requires OpenCV with EXR support:</p>
+                    <div class="solution">
+                        <h4>✅ Fix</h4>
+                        <pre>pip uninstall opencv-python
+pip install opencv-python-headless</pre>
+                    </div>
+                    <p>The save path must also be writable. Check the console for the actual output path.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>EXR looks wrong in other software</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Color space mismatch! EXR files store linear data by default.</p>
+                    <ul>
+                        <li>If exporting sRGB, the receiving app may expect linear</li>
+                        <li>If exporting log, tell the receiving app which log curve</li>
+                    </ul>
+                    <div class="solution">
+                        <h4>✅ For DaVinci Resolve</h4>
+                        <p>Set project color space to match what you exported:</p>
+                        <ul>
+                            <li>LogC export → Input: ARRI LogC3</li>
+                            <li>Linear export → Input: Linear</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>16-bit PNG has banding</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Banding in gradients is usually caused by:</p>
+                    <ul>
+                        <li>Viewing on an 8-bit monitor (can't display 16-bit)</li>
+                        <li>The source not having enough tonal range</li>
+                        <li>Aggressive color grading amplifying limited data</li>
+                    </ul>
+                    <div class="solution">
+                        <h4>✅ Reduce banding</h4>
+                        <ul>
+                            <li>Add subtle film grain to break up bands</li>
+                            <li>Export as 32-bit EXR for maximum quality</li>
+                            <li>Apply dithering if your target is 8-bit</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sampler Section -->
+        <section class="faq-section" id="sampler">
+            <h2>⚡ Radiance Sampler</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Flux images are blurry or low quality</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Common causes and fixes:</p>
+                    <ul>
+                        <li><strong>Too few steps:</strong> Use at least 20 for flux-dev, 4-8 for flux-schnell</li>
+                        <li><strong>Wrong scheduler:</strong> Use "simple" for Flux models</li>
+                        <li><strong>CFG too high:</strong> Keep at 1.0 for Flux (it uses guidance differently)</li>
+                    </ul>
+                    <div class="solution">
+                        <h4>✅ Recommended Flux settings</h4>
+                        <pre>steps: 20 (dev) or 4 (schnell)
+cfg: 1.0
+sampler: euler
+scheduler: simple
+flux_shift: 1.0
+flux_guidance: 3.5</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>What does flux_shift do?</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p><code>flux_shift</code> adjusts the sigma (noise) schedule for Flux models.</p>
+                    <ul>
+                        <li><strong>1.0</strong> — Default, good for most uses</li>
+                        <li><strong>1.5-2.0</strong> — Better for higher resolutions</li>
+                        <li><strong>3.0+</strong> — Experimental, can improve detail at very high res</li>
+                    </ul>
+                    <p>This is similar to how SDXL uses different schedules for 1024px vs 512px.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Difference from standard KSampler?</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>The FXTD Radiance Sampler adds:</p>
+                    <ul>
+                        <li><strong>Flux-specific sigma shifting</strong> — Built into the node</li>
+                        <li><strong>Flux guidance parameter</strong> — Controls the Flux-specific CFG</li>
+                        <li><strong>Timing diagnostics</strong> — See how long sampling takes</li>
+                        <li><strong>Better defaults</strong> — Pre-configured for Flux</li>
+                    </ul>
+                    <p>It's fully compatible with non-Flux models too!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Viewer Section -->
+        <section class="faq-section" id="viewer">
+            <h2>👁️ Radiance Pro Viewer</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Radiance Pro Viewer not loading / blank</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>The Radiance Pro Viewer requires JavaScript extensions:</p>
+                    <ul>
+                        <li>Make sure <code>js/</code> folder exists in the extension</li>
+                        <li>Hard refresh your browser (<kbd>Ctrl+Shift+R</kbd>)</li>
+                        <li>Check browser console for JavaScript errors</li>
+                    </ul>
+                    <div class="solution">
+                        <h4>✅ Verify JS extension is loaded</h4>
+                        <p>You should see in ComfyUI console:</p>
+                        <pre>[FXTDStudio Radiance] Radiance Pro Viewer JavaScript extension enabled</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Keyboard shortcuts not working</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Make sure the viewer has focus:</p>
+                    <ul>
+                        <li>Click on the image in the viewer first</li>
+                        <li>No other input fields should be focused</li>
+                    </ul>
+                    <div class="solution">
+                        <h4>✅ Available shortcuts</h4>
+                        <pre>H — Toggle histogram
+W — Toggle waveform
+V — Toggle vectorscope
+E — Toggle false color (exposure)
+F — Toggle fullscreen
+R / G / B — Isolate channels
+1 — Reset to 100% zoom
+0 — Fit to screen</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>How do I use A/B comparison?</h3>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Connect two images to compare them:</p>
+                    <ul>
+                        <li><strong>image</strong> — Primary image (A)</li>
+                        <li><strong>compare_image</strong> — Secondary image (B)</li>
+                    </ul>
+                    <div class="solution">
+                        <h4>✅ Comparison modes</h4>
+                        <ul>
+                            <li><strong>Wipe</strong> — Drag to reveal A or B</li>
+                            <li><strong>Difference</strong> — Shows what changed</li>
+                            <li><strong>A | B</strong> — Press <kbd>A</kbd> or <kbd>B</kbd> to toggle</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p><span class="brand">FXTD Studios</span> © 2024-2026</p>
+            <p>
+                <a href="index.html">Documentation</a> ·
+                <a href="tutorials.html">Tutorials</a> ·
+                <a href="node_reference.html">Node Reference</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // FAQ Toggle
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const item = question.parentElement;
+                item.classList.toggle('open');
+            });
+        });
+
+        // Search functionality
+        const searchInput = document.querySelector('.search-box input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    item.style.display = text.includes(query) ? 'block' : 'none';
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

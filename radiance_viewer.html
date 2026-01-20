@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radiance Viewer Manual - FXTD Studio Radiance</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* ComfyUI Dark Theme */
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #202020;
+            --bg-card: rgba(35, 35, 35, 0.95);
+            --bg-card-hover: rgba(45, 45, 45, 0.95);
+            --bg-glass: rgba(255, 255, 255, 0.02);
+            --text-primary: #e0e0e0;
+            --text-secondary: #888888;
+            --text-muted: #666666;
+            --accent-gold: #888888;
+            --accent-amber: #999999;
+            --accent-crimson: #777777;
+            --accent-coral: #999999;
+            --accent-teal: #aaaaaa;
+            --accent-violet: #888888;
+            --accent-blue: #888888;
+            --gradient-brand: linear-gradient(135deg, #555 0%, #444 50%, #333 100%);
+            --gradient-gold: linear-gradient(135deg, #666 0%, #555 100%);
+            --gradient-warm: linear-gradient(135deg, #555 0%, #444 100%);
+            --gradient-glow: none;
+            --border-default: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(255, 255, 255, 0.2);
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-glow: none;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            text-align: center;
+            padding: 4rem 2rem;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212, 168, 83, 0.3), transparent);
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.75rem;
+            color: #ffffff;
+            text-shadow: 0 0 60px rgba(255, 255, 255, 0.2);
+        }
+
+        header .subtitle {
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            letter-spacing: 0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .header-badges {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            backdrop-filter: blur(10px);
+        }
+
+        .badge-gold {
+            background: linear-gradient(135deg, rgba(212, 168, 83, 0.2), rgba(232, 168, 56, 0.15));
+            border-color: rgba(212, 168, 83, 0.4);
+            color: var(--accent-gold);
+        }
+
+        .badge-teal {
+            background: rgba(45, 212, 191, 0.12);
+            border-color: rgba(45, 212, 191, 0.3);
+            color: var(--accent-teal);
+        }
+
+        .badge-violet {
+            background: rgba(139, 92, 246, 0.12);
+            border-color: rgba(139, 92, 246, 0.3);
+            color: var(--accent-violet);
+        }
+
+        /* ===== BACK LINK ===== */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-gold);
+        }
+
+        /* ===== SECTION CARDS ===== */
+        .section {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-default);
+            box-shadow: var(--shadow-card);
+        }
+
+        .section h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .section h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem 0;
+            color: var(--accent-gold);
+        }
+
+        .section p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        /* ===== KEYBOARD SHORTCUTS ===== */
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .shortcut {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            padding: 0.5rem 0;
+        }
+
+        .key {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            padding: 0.5rem 0.85rem;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-weight: 500;
+            font-size: 0.85rem;
+            min-width: 42px;
+            text-align: center;
+            color: var(--accent-gold);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ===== INTERFACE DIAGRAM ===== */
+        .interface-diagram {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .interface-diagram pre {
+            margin: 0;
+        }
+
+        /* ===== FEATURE GRID ===== */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .feature-card h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        /* ===== TABLES ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th,
+        td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-default);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        tr:hover td {
+            color: var(--text-primary);
+        }
+
+        /* ===== COLOR LEGEND ===== */
+        .color-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            background: var(--bg-glass);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ===== TIPS BOX ===== */
+        .tip-box {
+            background: rgba(45, 212, 191, 0.08);
+            border: 1px solid rgba(45, 212, 191, 0.2);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .tip-box h4 {
+            color: var(--accent-teal);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tip-box p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* ===== INDUSTRY COMPARISON ===== */
+        .comparison-table td:first-child {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .check {
+            color: var(--accent-teal);
+            font-weight: bold;
+        }
+
+        .partial {
+            color: var(--accent-amber);
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-top: 2rem;
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer .brand {
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        footer a {
+            color: var(--accent-gold);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            header {
+                padding: 3rem 1rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+
+            .shortcuts-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* ===== LIGHTBOX ===== */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .lightbox.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox img {
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 8px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1);
+        }
+
+        .lightbox.visible img {
+            transform: scale(1);
+        }
+
+        .viewer-screenshot {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border-default);
+            cursor: zoom-in;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: block;
+        }
+
+        .viewer-screenshot:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-gold);
+            box-shadow: 0 8px 30px rgba(212, 168, 83, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Documentation Navigation -->
+    <!-- Documentation Navigation -->
+    <nav
+        style="background: #252525; border-bottom: 1px solid #333; padding: 0.75rem 2rem; position: sticky; top: 0; z-index: 100;">
+        <div
+            style="max-width: 1440px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <a href="index.html" style="text-decoration: none; color: #e0e0e0; font-weight: 600; font-size: 1.2rem;">
+                Radiance
+            </a>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <a href="index.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Overview</a>
+                <a href="installation.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Installation</a>
+                <a href="node_reference.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Nodes</a>
+                <a href="radiance_viewer.html"
+                    style="color: #fff; text-decoration: none; padding: 0.35rem 0.75rem; background: #444; border-radius: 4px; font-size: 0.9rem;">Viewer</a>
+                <a href="tutorials.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Tutorials</a>
+                <a href="faq.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">FAQ</a>
+                <a href="changelog.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Changelog</a>
+                <button id="themeToggle" class="theme-toggle"
+                    style="background: #333; border: 1px solid #444; border-radius: 4px; padding: 0.35rem 0.75rem; color: #888; cursor: pointer; font-size: 0.85rem;">☀
+                    Light</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <h1>🎬 Radiance Viewer</h1>
+            <p class="subtitle">VFX Industry-Standard Image Viewer for ComfyUI</p>
+            <div class="header-badges">
+                <span class="badge badge-gold">Professional Grade</span>
+                <span class="badge badge-teal">GPU Accelerated</span>
+                <span class="badge badge-violet">Interactive</span>
+            </div>
+        </header>
+
+        <!-- Overview Section -->
+        <section class="section">
+            <h2>📖 Overview</h2>
+            <p>The Radiance Pro Viewer brings professional image analysis tools from industry applications like
+                <strong>Autodesk Flame</strong>, <strong>Foundry Nuke</strong>, and <strong>DaVinci Resolve</strong>
+                directly into ComfyUI.
+            </p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🔍 Interactive Navigation</h4>
+                    <p>Smooth zoom and pan with mouse wheel and drag gestures.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📊 Professional Scopes</h4>
+                    <p>Real-time Histogram, Waveform, and Vectorscope analysis.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🎨 Exposure Controls</h4>
+                    <p>Adjust display EV and gamma for evaluating HDR content.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🚨 False Color & Zebra</h4>
+                    <p>ARRI-style exposure visualization and clipping detection.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>↔️ A/B Comparison</h4>
+                    <p>Wipe and difference modes for comparing versions.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📺 Fullscreen Mode</h4>
+                    <p>Expand viewer to full screen for detailed inspection.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Getting Started -->
+        <section class="section">
+            <h2>🚀 Getting Started</h2>
+
+            <h3>Adding the Node</h3>
+            <p>Search for <code style="color: var(--accent-gold)">Radiance Viewer</code> in the ComfyUI node menu,
+                or navigate to <strong>FXTD STUDIO → Radiance → Viewer</strong>.</p>
+
+            <h3>First Steps</h3>
+            <table>
+                <tr>
+                    <td><strong>Scroll</strong></td>
+                    <td>Zoom in/out towards cursor</td>
+                </tr>
+                <tr>
+                    <td><strong>Shift + Drag</strong></td>
+                    <td>Pan around the image</td>
+                </tr>
+                <tr>
+                    <td><strong>Press F</strong></td>
+                    <td>Fit image to view</td>
+                </tr>
+                <tr>
+                    <td><strong>Press 1</strong></td>
+                    <td>100% zoom (1:1 pixels)</td>
+                </tr>
+                <tr>
+                    <td><strong>Click</strong></td>
+                    <td>Sample color values</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Interface Layout -->
+        <section class="section">
+            <h2>🖥️ Interface Layout</h2>
+            <img src="nodes/FXTD_Radiance_Sampler_Pro.png" alt="Radiance Viewer Interface" class="viewer-screenshot"
+                onclick="openLightbox(this.src)">
+            <p style="text-align: center; margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                <em>Click image to view in full quality</em>
+            </p>
+        </section>
+
+        <!-- Keyboard Shortcuts -->
+        <section class="section">
+            <h2>⌨️ Keyboard Shortcuts</h2>
+            <div class="shortcuts-grid">
+                <div class="shortcut"><span class="key">F</span> Fit to View</div>
+                <div class="shortcut"><span class="key">1</span> 100% Zoom</div>
+                <div class="shortcut"><span class="key">R</span> Red Channel</div>
+                <div class="shortcut"><span class="key">G</span> Green Channel</div>
+                <div class="shortcut"><span class="key">B</span> Blue Channel</div>
+                <div class="shortcut"><span class="key">L</span> Luminance</div>
+                <div class="shortcut"><span class="key">C</span> Color (RGB)</div>
+                <div class="shortcut"><span class="key">H</span> Histogram</div>
+                <div class="shortcut"><span class="key">W</span> Waveform</div>
+                <div class="shortcut"><span class="key">V</span> Vectorscope</div>
+                <div class="shortcut"><span class="key">E</span> False Color</div>
+                <div class="shortcut"><span class="key">Z</span> Zebra Pattern</div>
+                <div class="shortcut"><span class="key">A</span> A/B Compare</div>
+                <div class="shortcut"><span class="key">D</span> Annotate</div>
+                <div class="shortcut"><span class="key">?</span> Help Overlay</div>
+                <div class="shortcut"><span class="key">F11</span> Fullscreen</div>
+                <div class="shortcut"><span class="key">T</span> Save Snapshot</div>
+            </div>
+        </section>
+
+        <!-- Professional Scopes -->
+        <section class="section">
+            <h2>📊 Professional Scopes</h2>
+
+            <h3>Histogram (H)</h3>
+            <p>Shows the distribution of pixel values across the tonal range. Watch for:</p>
+            <ul style="color: var(--text-secondary); margin-left: 1.5rem; margin-bottom: 1rem;">
+                <li><strong>Clipping at edges</strong> = lost detail in shadows/highlights</li>
+                <li><strong>Gaps in histogram</strong> = posterization</li>
+                <li><strong>Bunching</strong> = low contrast</li>
+            </ul>
+
+            <h3>Waveform (W)</h3>
+            <p>Displays luminance distribution across the horizontal axis of the image. Vertical position indicates
+                brightness level (0-100%).</p>
+
+            <div class="tip-box">
+                <h4>💡 Pro Tip</h4>
+                <p>If pixels touch the top of the waveform, highlights are clipping. If they touch the bottom, shadows
+                    are crushed.</p>
+            </div>
+
+            <h3>Vectorscope (V)</h3>
+            <p>Shows color hue (angle) and saturation (distance from center). Useful for checking skin tones and color
+                balance.</p>
+        </section>
+
+        <!-- False Color -->
+        <section class="section">
+            <h2>🎨 False Color Analysis (E)</h2>
+            <p>ARRI-style exposure visualization shows luminance levels as distinct colors:</p>
+
+            <div class="color-legend">
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #8b5cf6;"></div>
+                    <span><strong>Purple</strong> — &lt;1% Crushed blacks</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #3b82f6;"></div>
+                    <span><strong>Blue</strong> — 1-8% Underexposed</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #06b6d4;"></div>
+                    <span><strong>Cyan</strong> — 8-16% Dark shadows</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #6b7280;"></div>
+                    <span><strong>Grey</strong> — ~18% Middle grey</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #22c55e;"></div>
+                    <span><strong>Green</strong> — 18-35% Optimal</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #eab308;"></div>
+                    <span><strong>Yellow</strong> — 35-55% Bright</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #f97316;"></div>
+                    <span><strong>Orange</strong> — 55-75% Hot</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #ef4444;"></div>
+                    <span><strong>Red</strong> — 75-95% Very hot</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #ec4899;"></div>
+                    <span><strong>Magenta</strong> — &gt;95% Clipped</span>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <h4>💡 Usage</h4>
+                <p>Target skin tones in the green/yellow zone. Avoid magenta (clipped) unless intentional for creative
+                    effect.</p>
+            </div>
+        </section>
+
+        <!-- A/B Comparison -->
+        <section class="section">
+            <h2>↔️ A/B Comparison</h2>
+
+            <h3>Wipe Mode</h3>
+            <p>Press <span class="key" style="display: inline;">A</span> to enable split-screen comparison. Drag the
+                divider to compare two images side-by-side.</p>
+
+            <h3>Difference Mode</h3>
+            <p>Press <span class="key" style="display: inline;">A</span> again for difference view (5x amplified).
+                Bright areas indicate differences, black indicates identical pixels.</p>
+
+            <table>
+                <tr>
+                    <th>Mode</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>Wipe</td>
+                    <td>Draggable split-screen comparison</td>
+                </tr>
+                <tr>
+                    <td>Difference</td>
+                    <td>Highlights pixel differences (5x amplified)</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Industry Comparison -->
+        <section class="section">
+            <h2>🏆 Industry Comparison</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Radiance Pro</th>
+                        <th>Flame</th>
+                        <th>Nuke</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Zoom/Pan</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Exposure Control</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Histogram</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Waveform</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Vectorscope</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>False Color</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Zebra Pattern</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="partial">Plugin</td>
+                    </tr>
+                    <tr>
+                        <td>A/B Compare</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Color Picker</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Troubleshooting -->
+        <section class="section">
+            <h2>🔧 Troubleshooting</h2>
+
+            <h3>Viewer not appearing?</h3>
+            <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+                <li>Restart ComfyUI to load the JavaScript extension</li>
+                <li>Check browser console for errors (F12)</li>
+                <li>Verify <code>js/radiance_viewer.js</code> exists</li>
+            </ul>
+
+            <h3>Scopes not updating?</h3>
+            <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+                <li>Scopes update when the image changes</li>
+                <li>Toggle scope off/on to force refresh</li>
+            </ul>
+
+            <h3>Performance issues?</h3>
+            <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+                <li>Reduce preview image size</li>
+                <li>Disable vectorscope (most intensive)</li>
+                <li>Close other scope panels</li>
+            </ul>
+        </section>
+
+        <footer>
+            <p><span class="brand">FXTD Studios</span> © 2024-2026</p>
+            <p><a href="https://www.fxtd.org" target="_blank">www.fxtd.org</a></p>
+        </footer>
+    </div>
+    <!-- Lightbox Element -->
+    <div id="lightbox" class="lightbox" onclick="this.classList.remove('visible')">
+        <img id="lightbox-img" src="" alt="Full Quality View">
+    </div>
+
+    <script>
+        // Lightbox Function
+        function openLightbox(src) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            img.src = src;
+            lb.classList.add('visible');
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                document.getElementById('lightbox').classList.remove('visible');
+            }
+        });
+
+        // Theme Toggle Logic
+        const toggleBtn = document.getElementById('themeToggle');
+        const body = document.body;
+
+        toggleBtn.addEventListener('click', () => {
+            body.classList.toggle('light-theme');
+            const isLight = body.classList.contains('light-theme');
+            toggleBtn.innerHTML = isLight ? '🌙 Dark' : '☀ Light';
+        });
+
+        // Back to Top Logic
+        const backToTop = document.createElement('div');
+        backToTop.className = 'back-to-top';
+        backToTop.innerHTML = '↑';
+        backToTop.onclick = () => window.scrollTo(0, 0);
+        document.body.appendChild(backToTop);
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+    </script>
+</body>
+
+</html>

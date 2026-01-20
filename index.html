@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FXTD Studio - Radiance Documentation</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* ComfyUI Dark Theme Colors */
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #202020;
+            --bg-card: rgba(35, 35, 35, 0.95);
+            --bg-card-hover: rgba(45, 45, 45, 0.95);
+            --bg-glass: rgba(255, 255, 255, 0.02);
+
+            /* Text Colors - Muted */
+            --text-primary: #e0e0e0;
+            --text-secondary: #888888;
+            --text-muted: #666666;
+
+            /* Accent Colors - Subtle grays with one accent */
+            --accent-gold: #888888;
+            --accent-amber: #999999;
+            --accent-crimson: #777777;
+            --accent-coral: #999999;
+            --accent-teal: #aaaaaa;
+            --accent-violet: #888888;
+
+            /* Gradients - Subtle */
+            --gradient-brand: linear-gradient(135deg, #555555 0%, #444444 50%, #333333 100%);
+            --gradient-gold: linear-gradient(135deg, #666666 0%, #555555 100%);
+            --gradient-warm: linear-gradient(135deg, #555555 0%, #444444 100%);
+            --gradient-glow: none;
+
+            /* Borders & Effects */
+            --border-default: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(255, 255, 255, 0.2);
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-glow: none;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* B/W Icons */
+        .node-icon,
+        .feature-icon {
+            filter: grayscale(100%);
+            opacity: 0.7;
+        }
+
+        /* Light Theme */
+        body.light-theme {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #e0e0e0;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --text-primary: #1a1a1a;
+            --text-secondary: #555;
+            --text-muted: #888;
+            --border-default: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Print */
+        @media print {
+
+            nav,
+            #backToTop,
+            #themeToggle {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 2.5rem;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            text-align: center;
+            padding: 5rem 2rem;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212, 168, 83, 0.3), transparent);
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+        }
+
+        .logo-container {
+            margin-bottom: 1.5rem;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.75rem;
+            color: #ffffff;
+            text-shadow: 0 0 60px rgba(255, 255, 255, 0.2);
+        }
+
+        header .subtitle {
+            font-size: 1.35rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            letter-spacing: 0.02em;
+            margin-bottom: 2rem;
+        }
+
+        header .tagline {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 2.5rem;
+        }
+
+        /* ===== BADGES ===== */
+        .badges {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 0.6rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border: 1px solid transparent;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .badge-gold {
+            background: linear-gradient(135deg, rgba(212, 168, 83, 0.2), rgba(232, 168, 56, 0.15));
+            border-color: rgba(212, 168, 83, 0.4);
+            color: var(--accent-gold);
+        }
+
+        .badge-teal {
+            background: rgba(45, 212, 191, 0.12);
+            border-color: rgba(45, 212, 191, 0.3);
+            color: var(--accent-teal);
+        }
+
+        .badge-coral {
+            background: rgba(255, 107, 91, 0.12);
+            border-color: rgba(255, 107, 91, 0.3);
+            color: var(--accent-coral);
+        }
+
+        .badge-violet {
+            background: rgba(139, 92, 246, 0.12);
+            border-color: rgba(139, 92, 246, 0.3);
+            color: var(--accent-violet);
+        }
+
+        /* ===== NAVIGATION TOC ===== */
+        nav.toc {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid var(--border-default);
+            box-shadow: var(--shadow-card);
+        }
+
+        nav.toc h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+        }
+
+        nav.toc ul {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.5rem;
+            list-style: none;
+        }
+
+        nav.toc a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.35rem 0;
+            position: relative;
+            transition: all 0.25s ease;
+        }
+
+        nav.toc a:hover {
+            color: var(--accent-gold);
+        }
+
+        nav.toc a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-gold);
+            transition: width 0.25s ease;
+        }
+
+        nav.toc a:hover::after {
+            width: 100%;
+        }
+
+        /* ===== SHORTCUTS SECTION ===== */
+        .shortcuts-section {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            border: 1px solid var(--border-default);
+            box-shadow: var(--shadow-card);
+        }
+
+        .shortcuts-section h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .shortcut {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .key {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            padding: 0.5rem 0.85rem;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-weight: 500;
+            font-size: 0.85rem;
+            min-width: 42px;
+            text-align: center;
+            color: var(--accent-gold);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .shortcut:hover .key {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 12px rgba(212, 168, 83, 0.2);
+        }
+
+        /* ===== CATEGORY SECTIONS ===== */
+        .category {
+            margin-bottom: 4rem;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-default);
+        }
+
+        .category-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .category-count {
+            background: var(--bg-glass);
+            padding: 0.35rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            border: 1px solid var(--border-default);
+        }
+
+        /* ===== NODE CARDS GRID ===== */
+        .nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .node-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-default);
+            border-radius: 14px;
+            padding: 1.75rem;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .node-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-brand);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+
+        .node-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-card), var(--shadow-glow);
+        }
+
+        .node-card:hover::before {
+            opacity: 1;
+        }
+
+        .node-header {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .node-icon {
+            font-size: 1.4rem;
+            filter: drop-shadow(0 0 8px rgba(212, 168, 83, 0.3));
+        }
+
+        .node-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .node-class {
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--accent-gold);
+            background: rgba(212, 168, 83, 0.1);
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 0.85rem;
+            border: 1px solid rgba(212, 168, 83, 0.2);
+        }
+
+        .node-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .node-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            background: var(--bg-glass);
+            color: var(--text-muted);
+            border: 1px solid var(--border-default);
+        }
+
+        .tag-gpu {
+            background: rgba(45, 212, 191, 0.12);
+            border-color: rgba(45, 212, 191, 0.25);
+            color: var(--accent-teal);
+        }
+
+        .tag-pro {
+            background: rgba(139, 92, 246, 0.12);
+            border-color: rgba(139, 92, 246, 0.25);
+            color: var(--accent-violet);
+        }
+
+        .tag-new {
+            background: rgba(212, 168, 83, 0.12);
+            border-color: rgba(212, 168, 83, 0.25);
+            color: var(--accent-gold);
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            margin-top: 2rem;
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        footer strong {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        footer .brand {
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            header {
+                padding: 3rem 1rem;
+            }
+
+            header h1 {
+                font-size: 2.25rem;
+            }
+
+            header .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .nodes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .shortcuts-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            nav.toc {
+                padding: 1.5rem;
+            }
+
+            .shortcuts-section {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.85rem;
+            }
+
+            .badges {
+                gap: 0.5rem;
+            }
+
+            .badge {
+                padding: 0.5rem 1rem;
+                font-size: 0.75rem;
+            }
+
+            .shortcuts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .category {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .category:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .category:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .category:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .category:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .category:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Documentation Navigation -->
+    <nav
+        style="background: #252525; border-bottom: 1px solid #333; padding: 0.75rem 2rem; position: sticky; top: 0; z-index: 100;">
+        <div
+            style="max-width: 1440px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <a href="index.html" style="text-decoration: none; color: #e0e0e0; font-weight: 600; font-size: 1.2rem;">
+                Radiance
+            </a>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <a href="index.html"
+                    style="color: #fff; text-decoration: none; padding: 0.35rem 0.75rem; background: #444; border-radius: 4px; font-size: 0.9rem;">Overview</a>
+                <a href="installation.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Installation</a>
+                <a href="node_reference.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Nodes</a>
+                <a href="radiance_viewer.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Viewer</a>
+                <a href="tutorials.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Tutorials</a>
+                <a href="faq.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">FAQ</a>
+                <a href="changelog.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Changelog</a>
+                <button id="themeToggle"
+                    style="background: #333; border: 1px solid #444; border-radius: 4px; padding: 0.35rem 0.75rem; color: #888; cursor: pointer; font-size: 0.85rem;">☀
+                    Light</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <img src="RADIANCE.png" alt="RADIANCE"
+                style="max-width: 550px; height: auto; margin-bottom: 0px; opacity: 0.9; mix-blend-mode: screen;">
+            <p
+                style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3em; color: var(--accent-gold); margin-top: 5px; margin-bottom: 2rem;">
+                by FXTD STUDIOS</p>
+            <p class="tagline">Industry-Grade Color Science · GPU Accelerated</p>
+            <div class="badges">
+                <span class="badge badge-gold">v1.0.1</span>
+                <span class="badge badge-teal">64 Nodes</span>
+                <span class="badge badge-coral">GPU Accelerated</span>
+                <span class="badge badge-violet">Industry Grade</span>
+            </div>
+        </header>
+
+        <nav class="toc">
+            <h3>📋 Categories</h3>
+            <ul>
+                <li><a href="#hdr">HDR Processing (6)</a></li>
+                <li><a href="#color">Color Grading (9)</a></li>
+                <li><a href="#film">Film Look (4)</a></li>
+                <li><a href="#upscale">Upscaling (2)</a></li>
+                <li><a href="#viewer">Viewer (2)</a></li>
+                <li><a href="#prompt">Prompting (1)</a></li>
+                <li><a href="#utils">Utilities (5)</a></li>
+            </ul>
+        </nav>
+
+        <section class="shortcuts-section">
+            <h2>⌨️ Radiance Pro Viewer Keyboard Shortcuts</h2>
+            <div class="shortcuts-grid">
+                <div class="shortcut"><span class="key">F</span> Fit to View</div>
+                <div class="shortcut"><span class="key">1</span> 100% Zoom</div>
+                <div class="shortcut"><span class="key">R</span> Red Channel</div>
+                <div class="shortcut"><span class="key">G</span> Green Channel</div>
+                <div class="shortcut"><span class="key">B</span> Blue Channel</div>
+                <div class="shortcut"><span class="key">L</span> Luminance</div>
+                <div class="shortcut"><span class="key">C</span> Color (RGB)</div>
+                <div class="shortcut"><span class="key">H</span> Histogram</div>
+                <div class="shortcut"><span class="key">W</span> Waveform</div>
+                <div class="shortcut"><span class="key">V</span> Vectorscope</div>
+                <div class="shortcut"><span class="key">E</span> False Color</div>
+                <div class="shortcut"><span class="key">Z</span> Zebra</div>
+                <div class="shortcut"><span class="key">A</span> A/B Compare</div>
+                <div class="shortcut"><span class="key">P</span> Fullscreen</div>
+            </div>
+        </section>
+
+        <!-- HDR Section -->
+        <section class="category" id="hdr">
+            <div class="category-header">
+                <h2>🌅 HDR Processing</h2>
+                <span class="category-count">24 nodes</span>
+            </div>
+            <div class="nodes-grid">
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🎨</span>
+                        <span class="node-name">Image to Float32</span>
+                    </div>
+                    <code class="node-class">ImageToFloat32</code>
+                    <p class="node-description">Convert standard 8-bit images to 32-bit floating point for HDR
+                        processing.</p>
+                    <div class="node-tags"><span class="tag">Input</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🎨</span>
+                        <span class="node-name">Float32 Color Correct</span>
+                    </div>
+                    <code class="node-class">Float32ColorCorrect</code>
+                    <p class="node-description">Professional color correction with exposure, contrast, saturation, and
+                        RGB lift/gamma/gain.</p>
+                    <div class="node-tags"><span class="tag tag-pro">Professional</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🌅</span>
+                        <span class="node-name">HDR Tone Map</span>
+                    </div>
+                    <code class="node-class">HDRToneMap</code>
+                    <p class="node-description">Apply professional tone mapping (ACES, Reinhard, Hable, AgX, Gran
+                        Turismo, etc.)</p>
+                    <div class="node-tags"><span class="tag tag-pro">10+ Operators</span></div>
+                </div>
+
+
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">📈</span>
+                        <span class="node-name">Log Curve Encode</span>
+                    </div>
+                    <code class="node-class">LogCurveEncode</code>
+                    <p class="node-description">Encode to ARRI LogC3/4, Sony S-Log3, Panasonic V-Log, Canon Log 3,
+                        ACEScct.</p>
+                    <div class="node-tags"><span class="tag tag-gpu">GPU</span><span class="tag">6 Curves</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">📉</span>
+                        <span class="node-name">Log Curve Decode</span>
+                    </div>
+                    <code class="node-class">LogCurveDecode</code>
+                    <p class="node-description">Decode log footage back to linear color space.</p>
+                    <div class="node-tags"><span class="tag tag-gpu">GPU</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🔄</span>
+                        <span class="node-name">Color Space Convert</span>
+                    </div>
+                    <code class="node-class">ColorSpaceConvert</code>
+                    <p class="node-description">Convert between sRGB, ACEScg, Rec.2020, XYZ color spaces.</p>
+                    <div class="node-tags"><span class="tag">Color Science</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🎬</span>
+                        <span class="node-name">ACES 2.0 Output Transform</span>
+                    </div>
+                    <code class="node-class">ACES2OutputTransform</code>
+                    <p class="node-description">Full ACES 2.0 pipeline with RRT and ODT for various displays.</p>
+                    <div class="node-tags"><span class="tag tag-pro">ACES 2.0</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🎬</span>
+                        <span class="node-name">LUT Apply</span>
+                    </div>
+                    <code class="node-class">LUTApply</code>
+                    <p class="node-description">Apply 3D LUTs (.cube, .3dl) with tetrahedral interpolation.</p>
+                    <div class="node-tags"><span class="tag tag-gpu">GPU</span><span class="tag">3D LUT</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🔀</span>
+                        <span class="node-name">HDR Exposure Blend</span>
+                    </div>
+                    <code class="node-class">HDRExposureBlend</code>
+                    <p class="node-description">Blend multiple exposures using Mertens Fusion or Laplacian Pyramid.</p>
+                    <div class="node-tags"><span class="tag tag-gpu">GPU</span><span class="tag">HDR Merge</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🌓</span>
+                        <span class="node-name">Shadow/Highlight Recovery</span>
+                    </div>
+                    <code class="node-class">HDRShadowHighlightRecovery</code>
+                    <p class="node-description">Lift shadows and recover highlights with local contrast control.</p>
+                    <div class="node-tags"><span class="tag tag-gpu">GPU</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">💾</span>
+                        <span class="node-name">Save EXR (32-bit)</span>
+                    </div>
+                    <code class="node-class">SaveImageEXR</code>
+                    <p class="node-description">Save as OpenEXR with compression options (ZIP, PIZ, RLE, DWAA).</p>
+                    <div class="node-tags"><span class="tag">Output</span><span class="tag">32-bit</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Viewer Section -->
+        <section class="category" id="viewer">
+            <div class="category-header">
+                <h2>📊 Viewer & Analysis</h2>
+                <span class="category-count">7 nodes</span>
+            </div>
+            <div class="nodes-grid">
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🎬</span>
+                        <span class="node-name">Radiance Pro Viewer</span>
+                    </div>
+                    <code class="node-class">FXTD_RadianceProViewer</code>
+                    <p class="node-description">Industry-level interactive viewer with scopes, false color, zebra, A/B
+                        comparison.</p>
+                    <div class="node-tags"><span class="tag tag-new">NEW</span><span
+                            class="tag tag-pro">Interactive</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🎬</span>
+                        <span class="node-name">FXTD Master Viewer</span>
+                    </div>
+                    <code class="node-class">FXTDMasterViewer</code>
+                    <p class="node-description">Comprehensive viewer with all analysis tools built-in.</p>
+                    <div class="node-tags"><span class="tag tag-pro">All-in-one</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">📊</span>
+                        <span class="node-name">FXTD Scope Viewer</span>
+                    </div>
+                    <code class="node-class">FXTDScopeViewer</code>
+                    <p class="node-description">Professional histogram, waveform, and vectorscope scopes.</p>
+                    <div class="node-tags"><span class="tag tag-gpu">GPU</span><span class="tag">Scopes</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🎨</span>
+                        <span class="node-name">Radiance Grade</span>
+                    </div>
+                    <code class="node-class">FXTD_Radiance_Grade</code>
+                    <p class="node-description">GPU-accelerated color grading with Lift/Gamma/Gain.</p>
+                    <div class="node-tags"><span class="tag tag-gpu">GPU</span><span class="tag">Grading</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🔍</span>
+                        <span class="node-name">Pixel Sampler</span>
+                    </div>
+                    <code class="node-class">FXTDPixelSampler</code>
+                    <p class="node-description">Sample pixel values with HDR stops calculation.</p>
+                    <div class="node-tags"><span class="tag">Analysis</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Film Section -->
+        <section class="category" id="film">
+            <div class="category-header">
+                <h2>🎞️ Film Effects</h2>
+                <span class="category-count">5 nodes</span>
+            </div>
+            <div class="nodes-grid">
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🎞️</span>
+                        <span class="node-name">FXTD Film Grain</span>
+                    </div>
+                    <code class="node-class">FXTDFilmGrain</code>
+                    <p class="node-description">Photorealistic film grain simulation with camera and film presets.</p>
+                    <div class="node-tags"><span class="tag tag-pro">30+ Cameras</span><span class="tag">20+
+                            Films</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">📷</span>
+                        <span class="node-name">FXTD Lens Effects</span>
+                    </div>
+                    <code class="node-class">FXTDLensEffects</code>
+                    <p class="node-description">Halation, bloom, chromatic aberration, vignetting.</p>
+                    <div class="node-tags"><span class="tag">Optical</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🎬</span>
+                        <span class="node-name">FXTD Film Look</span>
+                    </div>
+                    <code class="node-class">FXTDFilmLook</code>
+                    <p class="node-description">Complete film stock emulation in one node.</p>
+                    <div class="node-tags"><span class="tag tag-pro">All-in-one</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🎬</span>
+                        <span class="node-name">Pro Film Effects</span>
+                    </div>
+                    <code class="node-class">FXTDProFilmEffects</code>
+                    <p class="node-description">Advanced film processing with full control.</p>
+                    <div class="node-tags"><span class="tag tag-pro">Professional</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upscale Section -->
+        <section class="category" id="upscale">
+            <div class="category-header">
+                <h2>⬆️ Upscaling</h2>
+                <span class="category-count">7 nodes</span>
+            </div>
+            <div class="nodes-grid">
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🤖</span>
+                        <span class="node-name">FXTD AI Upscale</span>
+                    </div>
+                    <code class="node-class">FXTDAIUpscale</code>
+                    <p class="node-description">AI upscaling with RealESRGAN, SUPIR, and more.</p>
+                    <div class="node-tags"><span class="tag tag-gpu">GPU</span><span class="tag tag-new">AI</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">⬆️</span>
+                        <span class="node-name">FXTD Pro Upscale</span>
+                    </div>
+                    <code class="node-class">FXTDProUpscale</code>
+                    <p class="node-description">Professional Lanczos/Mitchell upscaling with sharpening.</p>
+                    <div class="node-tags"><span class="tag">32-bit</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🔲</span>
+                        <span class="node-name">Upscale Tiled</span>
+                    </div>
+                    <code class="node-class">FXTDUpscaleTiled</code>
+                    <p class="node-description">Tile-based upscaling for large images.</p>
+                    <div class="node-tags"><span class="tag">Large Images</span></div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🔪</span>
+                        <span class="node-name">Sharpen 32-bit</span>
+                    </div>
+                    <code class="node-class">FXTDSharpen32bit</code>
+                    <p class="node-description">GPU-accelerated sharpening with multiple methods.</p>
+                    <div class="node-tags"><span class="tag tag-gpu">GPU</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sampler Section -->
+        <section class="category" id="sampler">
+            <div class="category-header">
+                <h2>⚡ Sampling</h2>
+                <span class="category-count">2 nodes</span>
+            </div>
+            <div class="nodes-grid">
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">⚡</span>
+                        <span class="node-name">Radiance Sampler</span>
+                    </div>
+                    <code class="node-class">FXTD_Radiance_Sampler</code>
+                    <p class="node-description">Flux-optimized sampler with native sigma shifting and guidance control.
+                    </p>
+                    <div class="node-tags"><span class="tag tag-new">Flux</span><span class="tag">Sigma Shift</span>
+                    </div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <span class="node-icon">🔧</span>
+                        <span class="node-name">Radiance Sampler Pro</span>
+                    </div>
+                    <code class="node-class">FXTD_Radiance_Sampler_Pro</code>
+                    <p class="node-description">Advanced sampler with full step-by-step control.</p>
+                    <div class="node-tags"><span class="tag tag-pro">Advanced</span></div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p><strong class="brand">FXTD Studios</strong> © 2024-2026</p>
+            <p>Making AI image generation professional-grade</p>
+            <div style="margin-top: 1rem; display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                <a href="https://www.fxtd.org" target="_blank" style="color: #888; text-decoration: none;">🌐
+                    fxtd.org</a>
+                <a href="https://github.com/fxtdstudios" target="_blank"
+                    style="color: #888; text-decoration: none;">GitHub</a>
+                <a href="https://instagram.com/fxtdstudios" target="_blank"
+                    style="color: #888; text-decoration: none;">Instagram</a>
+                <a href="https://linkedin.com/company/fxtdstudios" target="_blank"
+                    style="color: #888; text-decoration: none;">LinkedIn</a>
+                <a href="https://vimeo.com/fxtdstudios" target="_blank"
+                    style="color: #888; text-decoration: none;">Vimeo</a>
+                <a href="https://discord.gg/fxtdstudios" target="_blank"
+                    style="color: #888; text-decoration: none;">Discord</a>
+                <a href="https://facebook.com/fxtdstudios" target="_blank"
+                    style="color: #888; text-decoration: none;">Facebook</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop"
+        style="position: fixed; bottom: 2rem; right: 2rem; width: 48px; height: 48px; background: #333; border: 1px solid #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; visibility: hidden; transition: all 0.3s; z-index: 1000; color: #888; font-size: 1.2rem;">↑</button>
+
+    <script>
+        // Back to top
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.style.opacity = '1';
+                backToTop.style.visibility = 'visible';
+            } else {
+                backToTop.style.opacity = '0';
+                backToTop.style.visibility = 'hidden';
+            }
+        });
+        backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        if (localStorage.getItem('fxtd-docs-theme') === 'light') {
+            document.body.classList.add('light-theme');
+            themeToggle.textContent = '◐ Dark';
+        }
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            themeToggle.textContent = isLight ? '◐ Dark' : '☀ Light';
+            localStorage.setItem('fxtd-docs-theme', isLight ? 'light' : 'dark');
+        });
+    </script>
+</body>
+
+</html>

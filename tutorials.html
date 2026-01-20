@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorials - FXTD Studio Radiance</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* ComfyUI Dark Theme */
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #202020;
+            --bg-card: rgba(35, 35, 35, 0.95);
+            --bg-glass: rgba(255, 255, 255, 0.02);
+            --text-primary: #e0e0e0;
+            --text-secondary: #888888;
+            --text-muted: #666666;
+            --accent-gold: #888888;
+            --accent-amber: #999999;
+            --accent-teal: #aaaaaa;
+            --accent-violet: #888888;
+            --accent-coral: #999999;
+            --gradient-gold: linear-gradient(135deg, #666 0%, #555 100%);
+            --gradient-glow: none;
+            --border-default: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(255, 255, 255, 0.2);
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .back-link:hover {
+            color: var(--accent-gold);
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        header .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Tutorial Navigation */
+        .tutorial-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .tutorial-link {
+            background: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .tutorial-link:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .tutorial-link h3 {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tutorial-link p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        /* Tutorial Section */
+        .tutorial {
+            background: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tutorial-header {
+            border-bottom: 1px solid var(--border-default);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tutorial-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .tutorial-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .tutorial-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meta-item strong {
+            color: var(--accent-gold);
+        }
+
+        /* Steps */
+        .step {
+            margin-bottom: 2rem;
+            padding-left: 3rem;
+            position: relative;
+        }
+
+        .step::before {
+            content: attr(data-step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: var(--gradient-gold);
+            color: #0a0a0f;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .step p {
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Workflow Diagram */
+        .workflow {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .workflow .node {
+            color: var(--accent-teal);
+        }
+
+        .workflow .arrow {
+            color: var(--accent-gold);
+        }
+
+        .workflow .comment {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Settings Table */
+        .settings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+        }
+
+        .settings-table th,
+        .settings-table td {
+            padding: 0.6rem 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-default);
+        }
+
+        .settings-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .settings-table td {
+            color: var(--text-secondary);
+        }
+
+        .settings-table code {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-gold);
+            background: rgba(212, 168, 83, 0.1);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        /* Tips */
+        .tip {
+            background: rgba(45, 212, 191, 0.08);
+            border: 1px solid rgba(45, 212, 191, 0.2);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+        }
+
+        .tip h4 {
+            color: var(--accent-teal);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tip p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .warning {
+            background: rgba(255, 107, 91, 0.08);
+            border: 1px solid rgba(255, 107, 91, 0.2);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+        }
+
+        .warning h4 {
+            color: var(--accent-coral);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .warning p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Result Box */
+        .result-box {
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .result-box h4 {
+            color: var(--accent-violet);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .result-box ul {
+            color: var(--text-secondary);
+            margin-left: 1.5rem;
+        }
+
+        .result-box li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer .brand {
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        footer a {
+            color: var(--accent-gold);
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .tutorial {
+                padding: 1.5rem;
+            }
+
+            .step {
+                padding-left: 2.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Documentation Navigation -->
+    <!-- Documentation Navigation -->
+    <nav
+        style="background: #252525; border-bottom: 1px solid #333; padding: 0.75rem 2rem; position: sticky; top: 0; z-index: 100;">
+        <div
+            style="max-width: 1440px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <a href="index.html" style="text-decoration: none; color: #e0e0e0; font-weight: 600; font-size: 1.2rem;">
+                Radiance
+            </a>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <a href="index.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Overview</a>
+                <a href="installation.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Installation</a>
+                <a href="node_reference.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Nodes</a>
+                <a href="radiance_viewer.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Viewer</a>
+                <a href="tutorials.html"
+                    style="color: #fff; text-decoration: none; padding: 0.35rem 0.75rem; background: #444; border-radius: 4px; font-size: 0.9rem;">Tutorials</a>
+                <a href="faq.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">FAQ</a>
+                <a href="changelog.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Changelog</a>
+                <button id="themeToggle" class="theme-toggle"
+                    style="background: #333; border: 1px solid #444; border-radius: 4px; padding: 0.35rem 0.75rem; color: #888; cursor: pointer; font-size: 0.85rem;">☀
+                    Light</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <h1>📚 Tutorials</h1>
+            <p class="subtitle">Step-by-step guides for professional workflows</p>
+        </header>
+
+        <!-- Tutorial Navigation -->
+        <div class="tutorial-nav">
+            <a href="#getting-started" class="tutorial-link" style="border-color: var(--accent-gold);">
+                <h3>🚀 Getting Started (Beginner)</h3>
+                <p>Complete workflow from model to final image</p>
+            </a>
+            <a href="#hdri" class="tutorial-link">
+                <h3>🌐 Creating HDRI from Scratch</h3>
+                <p>Generate 360° environment maps for 3D rendering</p>
+            </a>
+            <a href="#logc" class="tutorial-link">
+                <h3>🎬 Cinema-Quality LogC Export</h3>
+                <p>Professional log encoding for color grading</p>
+            </a>
+            <a href="#prompt-machine" class="tutorial-link">
+                <h3>✨ Cinematic Prompt Machine</h3>
+                <p>Master the art of professional prompts</p>
+            </a>
+            <a href="#film-look" class="tutorial-link">
+                <h3>🎞️ Film Look Pipeline</h3>
+                <p>Create authentic film emulation</p>
+            </a>
+        </div>
+
+        <!-- Tutorial 0: Getting Started (Beginner) -->
+        <section class="tutorial" id="getting-started">
+            <div class="tutorial-header">
+                <h2>🚀 Getting Started: Your First Workflow</h2>
+                <p>Build a complete image generation pipeline from loading your model to saving your final image using
+                    the FXTD Radiance Sampler.</p>
+                <div class="tutorial-meta">
+                    <span class="meta-item">⏱️ <strong>10 min</strong></span>
+                    <span class="meta-item">📊 <strong>Beginner</strong></span>
+                    <span class="meta-item">🎯 <strong>Essential Foundation</strong></span>
+                </div>
+            </div>
+
+            <div class="step" data-step="1">
+                <h3>Load Your Model</h3>
+                <p>Start by loading your Flux model. Add a <strong>Load Checkpoint</strong> or <strong>Load Diffusion
+                        Model</strong> node:</p>
+                <div class="workflow">
+                    <span class="comment"># For Flux models, use:</span><br>
+                    <span class="node">[Load Diffusion Model]</span> → Select your flux1-dev.safetensors or
+                    flux1-schnell.safetensors
+                </div>
+                <table class="settings-table">
+                    <tr>
+                        <th>Model</th>
+                        <th>Description</th>
+                        <th>Steps Needed</th>
+                    </tr>
+                    <tr>
+                        <td><code>flux1-dev</code></td>
+                        <td>High quality, best results</td>
+                        <td>20-30 steps</td>
+                    </tr>
+                    <tr>
+                        <td><code>flux1-schnell</code></td>
+                        <td>Fast, good quality</td>
+                        <td>4-8 steps</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step" data-step="2">
+                <h3>Load CLIP and VAE</h3>
+                <p>Flux requires dual CLIP encoders and a VAE:</p>
+                <div class="workflow">
+                    <span class="node">[DualCLIPLoader]</span> → clip_l.safetensors + t5xxl_fp16.safetensors<br><br>
+                    <span class="node">[VAELoader]</span> → ae.safetensors (Flux VAE)
+                </div>
+            </div>
+
+            <div class="step" data-step="3">
+                <h3>Create Your Prompt</h3>
+                <p>Add a <strong>CLIP Text Encode</strong> node for your prompt. Connect the CLIP output from
+                    DualCLIPLoader:</p>
+                <div class="workflow">
+                    <span class="node">[DualCLIPLoader]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[CLIP Text Encode (Prompt)]</span>
+                </div>
+                <div class="tip">
+                    <h4>💡 Tip: Use Cinematic Prompt Machine</h4>
+                    <p>Add <strong>Radiance Cinematic Prompt Machine</strong> before your CLIP
+                        encoder to automatically construct professional, high-fidelity prompts!</p>
+                </div>
+            </div>
+
+            <div class="step" data-step="4">
+                <h3>Set Up Empty Latent</h3>
+                <p>Create an empty latent image as your canvas:</p>
+                <div class="workflow">
+                    <span class="node">[EmptySD3LatentImage]</span> <span class="comment"># or EmptyLatentImage</span>
+                </div>
+                <table class="settings-table">
+                    <tr>
+                        <th>Setting</th>
+                        <th>Recommended</th>
+                        <th>Notes</th>
+                    </tr>
+                    <tr>
+                        <td><code>width</code></td>
+                        <td>1024</td>
+                        <td>Standard Flux size</td>
+                    </tr>
+                    <tr>
+                        <td><code>height</code></td>
+                        <td>1024</td>
+                        <td>Square for best results</td>
+                    </tr>
+                    <tr>
+                        <td><code>batch_size</code></td>
+                        <td>1</td>
+                        <td>Number of images</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step" data-step="5">
+                <h3>Add the FXTD Radiance Sampler ⭐</h3>
+                <p>This is the heart of your workflow. The <strong>FXTD Radiance Sampler</strong> is optimized for Flux
+                    models:</p>
+                <div class="workflow">
+                    <span class="node">[Load Diffusion Model]</span> → <strong>model</strong><br>
+                    <span class="node">[CLIP Text Encode]</span> → <strong>positive</strong><br>
+                    <span class="node">[CLIP Text Encode]</span> → <strong>negative</strong> <span
+                        class="comment">(empty for Flux)</span><br>
+                    <span class="node">[EmptySD3LatentImage]</span> → <strong>latent_image</strong><br><br>
+                    <span class="arrow">All connect to → </span><span class="node">[⚡ FXTD Radiance Sampler]</span>
+                </div>
+                <table class="settings-table">
+                    <tr>
+                        <th>Setting</th>
+                        <th>Value</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>steps</code></td>
+                        <td>20</td>
+                        <td>Sampling steps (4-8 for schnell)</td>
+                    </tr>
+                    <tr>
+                        <td><code>cfg</code></td>
+                        <td>1.0</td>
+                        <td>Keep at 1.0 for Flux</td>
+                    </tr>
+                    <tr>
+                        <td><code>sampler</code></td>
+                        <td>euler</td>
+                        <td>Best for Flux</td>
+                    </tr>
+                    <tr>
+                        <td><code>scheduler</code></td>
+                        <td>simple</td>
+                        <td>Standard scheduler</td>
+                    </tr>
+                    <tr>
+                        <td><code>flux_shift</code></td>
+                        <td>1.0</td>
+                        <td>Sigma shift (increase for hi-res)</td>
+                    </tr>
+                    <tr>
+                        <td><code>flux_guidance</code></td>
+                        <td>3.5</td>
+                        <td>Flux guidance scale</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step" data-step="6">
+                <h3>Decode the Image</h3>
+                <p>Convert the latent back to a visible image:</p>
+                <div class="workflow">
+                    <span class="node">[⚡ FXTD Radiance Sampler]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[VAE Decode]</span>
+                    <span class="arrow"> ← </span>
+                    <span class="node">[VAELoader]</span>
+                </div>
+            </div>
+
+            <div class="step" data-step="7">
+                <h3>Preview with Radiance Pro Viewer</h3>
+                <p>Use the <strong>Radiance Pro Viewer</strong> to analyze your image with professional scopes:</p>
+                <div class="workflow">
+                    <span class="node">[VAE Decode]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[🎬 Radiance Pro Viewer]</span>
+                </div>
+                <p style="margin-top: 0.5rem;">The Radiance Pro Viewer gives you histogram, waveform, false color, and
+                    more.
+                    Press <kbd
+                        style="background: var(--bg-primary); padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid var(--border-default);">H</kbd>
+                    for histogram, <kbd
+                        style="background: var(--bg-primary); padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid var(--border-default);">E</kbd>
+                    for false color!</p>
+            </div>
+
+            <div class="step" data-step="8">
+                <h3>Save Your Image</h3>
+                <p>Finally, save your image to disk:</p>
+                <div class="workflow">
+                    <span class="node">[VAE Decode]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[Save Image]</span>
+                </div>
+                <p style="margin-top: 0.5rem;">For HDR quality, use <strong>FXTD Save EXR</strong> or <strong>FXTD Save
+                        16-bit</strong> instead!</p>
+            </div>
+
+            <div class="tip">
+                <h4>📋 Complete Workflow Summary</h4>
+                <div class="workflow" style="margin-top: 0.5rem;">
+                    <span class="node">[Load Diffusion Model]</span> ─────────────────────────────┐<br>
+                    <span class="node">[DualCLIPLoader]</span> → <span class="node">[CLIP Text Encode]</span>
+                    ───────────┤<br>
+                    <span class="node">[EmptySD3LatentImage]</span> ──────────────────────────────┤<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                        class="node">[⚡ FXTD Radiance Sampler]</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+                    <span class="node">[VAELoader]</span> → <span class="node">[VAE Decode]</span>
+                    ──────────────────────────┤<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="node">[🎬 Radiance Pro Viewer]</span> →
+                    <span class="node">[Save Image]</span>
+                </div>
+            </div>
+
+            <div class="result-box">
+                <h4>✅ You Now Have</h4>
+                <ul>
+                    <li>A complete Flux workflow with professional sampling</li>
+                    <li>Optimized settings for best quality output</li>
+                    <li>Professional image analysis with Radiance Pro Viewer</li>
+                    <li>Ready to enhance with film effects, upscaling, and more!</li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <h4>🚀 Next Steps</h4>
+                <p>Now that you have a basic workflow, explore the other tutorials to add:<br>
+                    • <a href="#film-look" style="color: var(--accent-coral);">Film effects and grain</a> for cinematic
+                    output<br>
+                    • <a href="#logc" style="color: var(--accent-coral);">LogC encoding</a> for professional color
+                    grading<br>
+                    • <a href="#hdri" style="color: var(--accent-coral);">HDRI generation</a> for 3D environments</p>
+            </div>
+        </section>
+
+        <!-- Tutorial 1: HDRI Creation -->
+        <section class="tutorial" id="hdri">
+            <div class="tutorial-header">
+                <h2>🌐 Creating HDRI from Scratch</h2>
+                <p>Generate professional 360° HDR environment maps for Blender, Maya, Unreal Engine, and other 3D
+                    applications.</p>
+                <div class="tutorial-meta">
+                    <span class="meta-item">⏱️ <strong>15 min</strong></span>
+                    <span class="meta-item">📊 <strong>Intermediate</strong></span>
+                    <span class="meta-item">🎯 <strong>3D Rendering, VFX</strong></span>
+                </div>
+            </div>
+
+            <div class="step" data-step="1">
+                <h3>Set Up Your Prompt</h3>
+                <p>Create a detailed prompt describing your environment. HDRI prompts work best with:</p>
+                <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+                    <li>Outdoor scenes with natural lighting</li>
+                    <li>Studio environments with controlled lighting</li>
+                    <li>Dramatic skies (sunset, sunrise, overcast)</li>
+                </ul>
+                <div class="workflow">
+                    <span class="comment"># Example HDRI prompts:</span><br>
+                    "equirectangular 360 panorama, sunset over ocean, golden hour, dramatic clouds, high dynamic
+                    range"<br><br>
+                    "360 degree studio environment, professional lighting setup, softboxes, grey backdrop, HDRI"<br><br>
+                    "spherical panorama, alien planet landscape, two suns, purple sky, sci-fi environment"
+                </div>
+            </div>
+
+            <div class="step" data-step="2">
+                <h3>Configure Flux for 360° Output</h3>
+                <p>Use a 2:1 aspect ratio for equirectangular projection:</p>
+                <table class="settings-table">
+                    <tr>
+                        <th>Setting</th>
+                        <th>Value</th>
+                        <th>Notes</th>
+                    </tr>
+                    <tr>
+                        <td><code>width</code></td>
+                        <td>2048</td>
+                        <td>Or 4096 for higher quality</td>
+                    </tr>
+                    <tr>
+                        <td><code>height</code></td>
+                        <td>1024</td>
+                        <td>Always half of width</td>
+                    </tr>
+                    <tr>
+                        <td><code>steps</code></td>
+                        <td>25-30</td>
+                        <td>More steps for detail</td>
+                    </tr>
+                    <tr>
+                        <td><code>cfg</code></td>
+                        <td>3.5</td>
+                        <td>Standard Flux guidance</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step" data-step="3">
+                <h3>Build the HDR Pipeline</h3>
+                <p>Connect these nodes to expand dynamic range and create a true HDRI:</p>
+                <div class="workflow">
+                    <span class="node">[VAE Decode]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[🎨 Image to Float32]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[🌅 HDR Expand Dynamic Range]</span><br>
+                    <span class="arrow"> → </span>
+                    <span class="node">[🌐 HDR 360 Generate]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[💾 Save HDRI]</span>
+                </div>
+            </div>
+
+            <div class="step" data-step="4">
+                <h3>Configure HDR Expansion</h3>
+                <p>Expand the dynamic range to simulate real HDR luminance:</p>
+                <table class="settings-table">
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Recommended</th>
+                        <th>Purpose</th>
+                    </tr>
+                    <tr>
+                        <td><code>highlight_recovery</code></td>
+                        <td>1.5 - 2.0</td>
+                        <td>Extend bright areas above 1.0</td>
+                    </tr>
+                    <tr>
+                        <td><code>highlight_power</code></td>
+                        <td>2.0 - 3.0</td>
+                        <td>How far highlights extend</td>
+                    </tr>
+                    <tr>
+                        <td><code>shadow_lift</code></td>
+                        <td>0.0 - 0.1</td>
+                        <td>Keep shadows natural</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step" data-step="5">
+                <h3>Save as HDRI</h3>
+                <p>Export in a 3D-application compatible format:</p>
+                <table class="settings-table">
+                    <tr>
+                        <th>Format</th>
+                        <th>Use Case</th>
+                    </tr>
+                    <tr>
+                        <td><code>.exr (32-bit)</code></td>
+                        <td>Best quality, all 3D apps</td>
+                    </tr>
+                    <tr>
+                        <td><code>.hdr (Radiance)</code></td>
+                        <td>Blender, Maya, wide support</td>
+                    </tr>
+                    <tr>
+                        <td><code>.tiff (32-bit)</code></td>
+                        <td>Photoshop compatible HDR</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="tip">
+                <h4>💡 Pro Tip</h4>
+                <p>For seamless 360° images, add "seamless panorama" or "continuous horizon" to your prompt. You can
+                    also generate multiple and blend them for variety.</p>
+            </div>
+
+            <div class="result-box">
+                <h4>✅ Expected Result</h4>
+                <ul>
+                    <li>32-bit EXR with extended dynamic range (10+ stops)</li>
+                    <li>Proper equirectangular projection for IBL lighting</li>
+                    <li>Ready to use in Blender, Maya, Unreal, or any 3D app</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Tutorial 2: LogC Export -->
+        <section class="tutorial" id="logc">
+            <div class="tutorial-header">
+                <h2>🎬 Cinema-Quality LogC Export</h2>
+                <p>Create DaVinci Resolve and Premiere Pro ready footage with professional log encoding.</p>
+                <div class="tutorial-meta">
+                    <span class="meta-item">⏱️ <strong>10 min</strong></span>
+                    <span class="meta-item">📊 <strong>Professional</strong></span>
+                    <span class="meta-item">🎯 <strong>Color Grading, Film Production</strong></span>
+                </div>
+            </div>
+
+            <div class="step" data-step="1">
+                <h3>Why Use Log Encoding?</h3>
+                <p>Log color spaces are used in professional film production because they:</p>
+                <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+                    <li>Preserve maximum dynamic range for color grading</li>
+                    <li>Match footage from cinema cameras (ARRI, Sony, RED)</li>
+                    <li>Give colorists more latitude in post-production</li>
+                    <li>Enable consistent look across different sources</li>
+                </ul>
+            </div>
+
+            <div class="step" data-step="2">
+                <h3>Build the LogC Pipeline</h3>
+                <p>This workflow converts AI-generated images to cinema-grade log footage:</p>
+                <div class="workflow">
+                    <span class="node">[VAE Decode]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[🎨 Image to Float32]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[🔄 Color Space: sRGB → ACEScg]</span><br>
+                    <span class="arrow"> → </span>
+                    <span class="node">[📈 Log Curve Encode: ARRI LogC3]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[💾 Save EXR (16-bit)]</span>
+                </div>
+            </div>
+
+            <div class="step" data-step="3">
+                <h3>Choose Your Log Curve</h3>
+                <p>Select based on your post-production workflow:</p>
+                <table class="settings-table">
+                    <tr>
+                        <th>Curve</th>
+                        <th>Best For</th>
+                        <th>Software Support</th>
+                    </tr>
+                    <tr>
+                        <td><code>ARRI LogC3</code></td>
+                        <td>Film production, most versatile</td>
+                        <td>All professional NLEs</td>
+                    </tr>
+                    <tr>
+                        <td><code>ARRI LogC4</code></td>
+                        <td>Latest ARRI cameras (ALEXA 35)</td>
+                        <td>DaVinci, Baselight</td>
+                    </tr>
+                    <tr>
+                        <td><code>Sony S-Log3</code></td>
+                        <td>Matching Sony camera footage</td>
+                        <td>All NLEs</td>
+                    </tr>
+                    <tr>
+                        <td><code>DaVinci Intermediate</code></td>
+                        <td>Pure DaVinci Resolve workflow</td>
+                        <td>DaVinci Resolve</td>
+                    </tr>
+                    <tr>
+                        <td><code>ACEScct</code></td>
+                        <td>Full ACES color pipeline</td>
+                        <td>Pro facilities</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step" data-step="4">
+                <h3>Configure Export Settings</h3>
+                <p>For maximum quality in post-production:</p>
+                <table class="settings-table">
+                    <tr>
+                        <th>Setting</th>
+                        <th>Value</th>
+                        <th>Reason</th>
+                    </tr>
+                    <tr>
+                        <td><code>Format</code></td>
+                        <td>EXR</td>
+                        <td>Full HDR, metadata support</td>
+                    </tr>
+                    <tr>
+                        <td><code>Bit Depth</code></td>
+                        <td>16-bit float</td>
+                        <td>Balance of quality and size</td>
+                    </tr>
+                    <tr>
+                        <td><code>Compression</code></td>
+                        <td>PIZ or ZIP</td>
+                        <td>Lossless, good ratio</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step" data-step="5">
+                <h3>Import into DaVinci Resolve</h3>
+                <p>To properly view your LogC footage in DaVinci Resolve:</p>
+                <ol style="color: var(--text-secondary); margin-left: 1.5rem;">
+                    <li>Import your EXR sequence</li>
+                    <li>Open <strong>Project Settings → Color Management</strong></li>
+                    <li>Set <strong>Color Science</strong> to "DaVinci YRGB Color Managed"</li>
+                    <li>Set <strong>Input Color Space</strong> to "ARRI LogC3" (or your chosen log)</li>
+                    <li>Set <strong>Timeline Color Space</strong> to "DaVinci Wide Gamut Intermediate"</li>
+                    <li>Your footage will now display correctly and grade beautifully!</li>
+                </ol>
+            </div>
+
+            <div class="warning">
+                <h4>⚠️ Important</h4>
+                <p>Log-encoded images will look flat and desaturated — this is normal! They must be viewed with the
+                    correct color transform applied. Never judge your image quality based on the raw log appearance.</p>
+            </div>
+
+            <div class="result-box">
+                <h4>✅ Expected Result</h4>
+                <ul>
+                    <li>16-bit or 32-bit EXR in professional log color space</li>
+                    <li>14+ stops of dynamic range preserved for grading</li>
+                    <li>Compatible with DaVinci Resolve, Premiere Pro, After Effects</li>
+                    <li>Matches real cinema camera footage in your timeline</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Tutorial 3: Prompt Machine -->
+        <section class="tutorial" id="prompt-machine">
+            <div class="tutorial-header">
+                <h2>✨ Mastering the Cinematic Prompt Machine</h2>
+                <p>Generate industry-standard cinematic prompts with granular control over every visual aspect.</p>
+                <div class="tutorial-meta">
+                    <span class="meta-item">⏱️ <strong>5 min</strong></span>
+                    <span class="meta-item">📊 <strong>Beginner</strong></span>
+                    <span class="meta-item">🎯 <strong>Any Generation</strong></span>
+                </div>
+            </div>
+
+            <div class="step" data-step="1">
+                <h3>Understanding the Prompt Machine</h3>
+                <p>The Cinematic Prompt Machine builds professional prompts by combining:</p>
+                <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+                    <li><strong>Camera</strong> — The camera body and sensor characteristics</li>
+                    <li><strong>Lens</strong> — Focal length, aperture, lens character</li>
+                    <li><strong>Lighting</strong> — Light quality, direction, mood</li>
+                    <li><strong>Film Stock</strong> — Color science and grain character</li>
+                    <li><strong>Style</strong> — Genre and artistic direction</li>
+                </ul>
+            </div>
+
+            <div class="step" data-step="2">
+                <h3>Connect the Node</h3>
+                <div class="workflow">
+                    <span class="node">[🎬 FXTD Cinematic Prompt Machine]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[CLIP Text Encode]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[KSampler / FXTD Sampler]</span>
+                </div>
+                <p style="margin-top: 0.75rem;">The node outputs a complete prompt string ready for your text encoder.
+                </p>
+            </div>
+
+            <div class="step" data-step="3">
+                <h3>Configure Camera & Lens</h3>
+                <p>Choose your virtual camera setup:</p>
+                <table class="settings-table">
+                    <tr>
+                        <th>Camera</th>
+                        <th>Character</th>
+                    </tr>
+                    <tr>
+                        <td><code>ARRI ALEXA 35</code></td>
+                        <td>Cinema standard, natural skin tones</td>
+                    </tr>
+                    <tr>
+                        <td><code>RED V-RAPTOR</code></td>
+                        <td>Sharp, high-resolution look</td>
+                    </tr>
+                    <tr>
+                        <td><code>Sony Venice 2</code></td>
+                        <td>High dynamic range, filmic</td>
+                    </tr>
+                    <tr>
+                        <td><code>Blackmagic URSA</code></td>
+                        <td>Punchy colors, indie film look</td>
+                    </tr>
+                </table>
+                <table class="settings-table" style="margin-top: 1rem;">
+                    <tr>
+                        <th>Lens</th>
+                        <th>Effect</th>
+                    </tr>
+                    <tr>
+                        <td><code>Cooke S7/i</code></td>
+                        <td>Classic cinema, gentle bokeh</td>
+                    </tr>
+                    <tr>
+                        <td><code>Zeiss Master Prime</code></td>
+                        <td>Clinical sharpness, modern</td>
+                    </tr>
+                    <tr>
+                        <td><code>Panavision Anamorphic</code></td>
+                        <td>Wide aspect, lens flares</td>
+                    </tr>
+                    <tr>
+                        <td><code>Canon K35</code></td>
+                        <td>Vintage, organic character</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step" data-step="4">
+                <h3>Set Lighting & Mood</h3>
+                <p>Define your lighting setup:</p>
+                <table class="settings-table">
+                    <tr>
+                        <th>Lighting</th>
+                        <th>Mood</th>
+                    </tr>
+                    <tr>
+                        <td><code>Golden Hour</code></td>
+                        <td>Warm, romantic, cinematic</td>
+                    </tr>
+                    <tr>
+                        <td><code>Blue Hour</code></td>
+                        <td>Cool, mysterious, contemplative</td>
+                    </tr>
+                    <tr>
+                        <td><code>Rembrandt</code></td>
+                        <td>Dramatic, portrait, classic</td>
+                    </tr>
+                    <tr>
+                        <td><code>High Key</code></td>
+                        <td>Bright, clean, commercial</td>
+                    </tr>
+                    <tr>
+                        <td><code>Noir</code></td>
+                        <td>High contrast, shadows, moody</td>
+                    </tr>
+                    <tr>
+                        <td><code>Natural Window</code></td>
+                        <td>Soft, diffused, documentary</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step" data-step="5">
+                <h3>Choose Film Stock & Style</h3>
+                <p>Add color science and genre styling:</p>
+                <table class="settings-table">
+                    <tr>
+                        <th>Film Stock</th>
+                        <th>Look</th>
+                    </tr>
+                    <tr>
+                        <td><code>Kodak Vision3 500T</code></td>
+                        <td>Warm, tungsten balanced, classic cinema</td>
+                    </tr>
+                    <tr>
+                        <td><code>Fuji Eterna</code></td>
+                        <td>Cooler tones, Japanese cinema</td>
+                    </tr>
+                    <tr>
+                        <td><code>CineStill 800T</code></td>
+                        <td>Halation, night photography</td>
+                    </tr>
+                    <tr>
+                        <td><code>Kodak Portra 400</code></td>
+                        <td>Skin tones, fashion photography</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step" data-step="6">
+                <h3>Add Your Subject</h3>
+                <p>Enter your main subject description in the <code>subject</code> field. The Prompt Machine will wrap
+                    it with all your cinematic settings.</p>
+                <div class="workflow">
+                    <span class="comment"># Example subject inputs:</span><br>
+                    "a woman walking through rain-soaked streets at night"<br>
+                    "an astronaut on the surface of Mars"<br>
+                    "a vintage car parked outside a diner"<br>
+                    "close-up portrait of an elderly man with weathered face"
+                </div>
+            </div>
+
+            <div class="tip">
+                <h4>💡 Pro Tips</h4>
+                <p>• Combine <strong>ARRI ALEXA + Cooke lenses</strong> for the most "Hollywood" look<br>
+                    • Use <strong>Anamorphic lenses</strong> for widescreen cinematic aspect<br>
+                    • <strong>CineStill 800T</strong> adds beautiful halation around lights<br>
+                    • Match <strong>camera + film stock</strong> from real productions you admire</p>
+            </div>
+
+            <div class="result-box">
+                <h4>✅ Example Output</h4>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; font-style: italic;">"A cinematic photograph
+                    of a woman walking through rain-soaked streets at night, shot on ARRI ALEXA 35 with Cooke S7/i 50mm
+                    prime lens at f/1.4, noir lighting with practical neon reflections, Kodak Vision3 500T film stock,
+                    4K resolution, professional color grading, shallow depth of field, film grain, high dynamic range"
+                </p>
+            </div>
+        </section>
+
+        <!-- Tutorial 4: Film Look -->
+        <section class="tutorial" id="film-look">
+            <div class="tutorial-header">
+                <h2>🎞️ Complete Film Look Pipeline</h2>
+                <p>Transform AI-generated images into authentic film-like footage with grain, halation, and color
+                    science.</p>
+                <div class="tutorial-meta">
+                    <span class="meta-item">⏱️ <strong>10 min</strong></span>
+                    <span class="meta-item">📊 <strong>Intermediate</strong></span>
+                    <span class="meta-item">🎯 <strong>Cinematic Output</strong></span>
+                </div>
+            </div>
+
+            <div class="step" data-step="1">
+                <h3>The Film Look Pipeline</h3>
+                <p>Connect nodes in this order for authentic film emulation:</p>
+                <div class="workflow">
+                    <span class="node">[VAE Decode]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[⬆️ FXTD Pro Upscale 2x]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[🎨 Radiance Grade]</span><br>
+                    <span class="arrow"> → </span>
+                    <span class="node">[🎬 FXTD Film Look]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[📷 FXTD Lens Effects]</span>
+                    <span class="arrow"> → </span>
+                    <span class="node">[Save Image]</span>
+                </div>
+            </div>
+
+            <div class="step" data-step="2">
+                <h3>Color Grade First</h3>
+                <p>Use Radiance Grade to set your base look before applying film effects:</p>
+                <table class="settings-table">
+                    <tr>
+                        <th>For This Look</th>
+                        <th>Settings</th>
+                    </tr>
+                    <tr>
+                        <td>Warm Cinema</td>
+                        <td>Lift: +0.02 orange, Gain: -0.03 blue</td>
+                    </tr>
+                    <tr>
+                        <td>Cool/Teal</td>
+                        <td>Lift: +0.03 teal, Gamma: -0.02 orange</td>
+                    </tr>
+                    <tr>
+                        <td>High Contrast</td>
+                        <td>Contrast: 1.2, Saturation: 1.1</td>
+                    </tr>
+                    <tr>
+                        <td>Faded Film</td>
+                        <td>Lift: +0.05, Contrast: 0.9, Sat: 0.85</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step" data-step="3">
+                <h3>Apply Film Stock</h3>
+                <p>Choose a film stock preset in FXTD Film Look:</p>
+                <table class="settings-table">
+                    <tr>
+                        <th>Stock</th>
+                        <th>Character</th>
+                        <th>Best For</th>
+                    </tr>
+                    <tr>
+                        <td><code>Kodak Vision3 500T</code></td>
+                        <td>Warm tungsten, fine grain</td>
+                        <td>Night scenes, interiors</td>
+                    </tr>
+                    <tr>
+                        <td><code>Kodak Vision3 250D</code></td>
+                        <td>Clean daylight, natural</td>
+                        <td>Outdoor, daylight scenes</td>
+                    </tr>
+                    <tr>
+                        <td><code>CineStill 800T</code></td>
+                        <td>Strong halation, neon glow</td>
+                        <td>Night city, neon lights</td>
+                    </tr>
+                    <tr>
+                        <td><code>Kodak Portra 400</code></td>
+                        <td>Beautiful skin tones</td>
+                        <td>Portraits, fashion</td>
+                    </tr>
+                    <tr>
+                        <td><code>Fuji Velvia 50</code></td>
+                        <td>Saturated, punchy</td>
+                        <td>Landscapes, vivid scenes</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="step" data-step="4">
+                <h3>Add Lens Character</h3>
+                <p>Add optical imperfections for authenticity:</p>
+                <table class="settings-table">
+                    <tr>
+                        <th>Effect</th>
+                        <th>Amount</th>
+                        <th>Purpose</th>
+                    </tr>
+                    <tr>
+                        <td><code>Halation</code></td>
+                        <td>0.1 - 0.3</td>
+                        <td>Highlight glow (film look)</td>
+                    </tr>
+                    <tr>
+                        <td><code>Chromatic Aberration</code></td>
+                        <td>0.5 - 1.5</td>
+                        <td>Color fringing at edges</td>
+                    </tr>
+                    <tr>
+                        <td><code>Vignette</code></td>
+                        <td>0.2 - 0.4</td>
+                        <td>Dark corners (cinema)</td>
+                    </tr>
+                    <tr>
+                        <td><code>Bloom</code></td>
+                        <td>0.1 - 0.2</td>
+                        <td>Soft glow overall</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="tip">
+                <h4>💡 Less is More</h4>
+                <p>Subtle effects look more professional. Start with low values and increase gradually. Heavy-handed
+                    grain and halation often look artificial.</p>
+            </div>
+
+            <div class="result-box">
+                <h4>✅ Expected Result</h4>
+                <ul>
+                    <li>Authentic film grain matching your chosen stock</li>
+                    <li>Subtle halation around bright areas</li>
+                    <li>Lens character (vignette, aberration)</li>
+                    <li>Color science matching real film stocks</li>
+                    <li>Professional cinematic output ready for delivery</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer>
+            <p><span class="brand">FXTD Studios</span> © 2024-2026</p>
+            <p><a href="https://www.fxtd.org" target="_blank">www.fxtd.org</a></p>
+        </footer>
+    </div>
+</body>
+
+</html>

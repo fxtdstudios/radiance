@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation - FXTD Studio Radiance</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* ComfyUI Dark Theme Colors */
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #202020;
+            --bg-card: rgba(35, 35, 35, 0.95);
+            --bg-card-hover: rgba(45, 45, 45, 0.95);
+            --bg-glass: rgba(255, 255, 255, 0.02);
+
+            /* Text Colors - Muted */
+            --text-primary: #e0e0e0;
+            --text-secondary: #888888;
+            --text-muted: #666666;
+
+            /* Accent Colors - Subtle grays with one accent */
+            --accent-gold: #888888;
+            --accent-green: #4caf50;
+            --accent-amber: #ff9800;
+            --accent-crimson: #777777;
+
+            /* Gradients - Subtle */
+            --gradient-brand: linear-gradient(135deg, #555555 0%, #444444 50%, #333333 100%);
+            --gradient-gold: linear-gradient(135deg, #666666 0%, #555555 100%);
+
+            /* Borders & Effects */
+            --border-default: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(255, 255, 255, 0.2);
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2.5rem;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            text-align: center;
+            padding: 4rem 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+            text-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
+        }
+
+        header .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-default);
+            border-radius: 14px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            margin: 1.5rem 0 0.5rem;
+            color: var(--text-primary);
+        }
+
+        /* ===== STEPS ===== */
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: #333;
+            border: 1px solid var(--border-default);
+            color: var(--text-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        /* ===== CODE ===== */
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-default);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: #d4d4d4;
+            margin: 0.75rem 0;
+        }
+
+        code {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+        }
+
+        /* ===== BADGES ===== */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-required {
+            background: rgba(76, 175, 80, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .badge-optional {
+            background: rgba(255, 152, 0, 0.15);
+            color: var(--accent-amber);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        /* ===== REQUIREMENTS GRID ===== */
+        .requirements {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .req-item {
+            background: var(--bg-glass);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-default);
+        }
+
+        .req-item strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .req-item small {
+            color: var(--text-secondary);
+        }
+
+        /* ===== ALERTS ===== */
+        .alert-box {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Documentation Navigation -->
+    <nav
+        style="background: #252525; border-bottom: 1px solid #333; padding: 0.75rem 2rem; position: sticky; top: 0; z-index: 100;">
+        <div
+            style="max-width: 1440px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <a href="index.html" style="text-decoration: none; color: #e0e0e0; font-weight: 600; font-size: 1.2rem;">
+                Radiance
+            </a>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <a href="index.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Overview</a>
+                <a href="installation.html"
+                    style="color: #fff; text-decoration: none; padding: 0.35rem 0.75rem; background: #444; border-radius: 4px; font-size: 0.9rem;">Installation</a>
+                <a href="node_reference.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Nodes</a>
+                <a href="radiance_viewer.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Viewer</a>
+                <a href="tutorials.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Tutorials</a>
+                <a href="faq.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">FAQ</a>
+                <a href="changelog.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Changelog</a>
+                <button id="themeToggle"
+                    style="background: #333; border: 1px solid #444; border-radius: 4px; padding: 0.35rem 0.75rem; color: #888; cursor: pointer; font-size: 0.85rem;">☀
+                    Light</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <div style="margin-bottom: 1rem; font-size: 3rem;">📦</div>
+            <h1>Installation Guide</h1>
+            <p class="subtitle">Quick start setup for FXTD Studio Radiance</p>
+        </header>
+
+        <!-- Quick Install -->
+        <div class="card">
+            <h2>⚡ Quick Install</h2>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Clone the Repository</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:0.5rem; font-size:0.9rem;">Navigate to your
+                        ComfyUI custom nodes directory:</p>
+                    <pre>cd ComfyUI/custom_nodes
+git clone https://github.com/fxtdstudios/fxtdstudio-radiance.git</pre>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Install Dependencies</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:0.5rem; font-size:0.9rem;">Install the required
+                        packages using pip:</p>
+                    <pre>cd fxtdstudio-radiance
+pip install -r requirements.txt</pre>
+                    <p style="color:var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem;">Note: This will
+                        install core requirements. Optional features (like EXR or Depth Maps) may require extra steps
+                        below.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Restart ComfyUI</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:0.5rem; font-size:0.9rem;">Restart your server.
+                        Check the console for:</p>
+                    <pre>[FXTDStudio Radiance] 🟢 Loaded 50+ nodes (v1.0.0)</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requirements -->
+        <div class="card">
+            <h2>📋 System Requirements</h2>
+
+            <h3>Core Framework <span class="badge badge-required">Required</span></h3>
+            <div class="requirements">
+                <div class="req-item">
+                    <strong>PyTorch (CUDA)</strong>
+                    <small>GPU-accelerated processing used for tone mapping and gradients.</small>
+                </div>
+                <div class="req-item">
+                    <strong>Pillow & NumPy</strong>
+                    <small>Standard image handling libraries.</small>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 2rem;">Feature-Specific <span class="badge badge-optional">Recommended</span></h3>
+            <div class="requirements">
+                <div class="req-item">
+                    <strong>transformers</strong>
+                    <small>Required for <strong>Depth Anything V2</strong> integration.</small>
+                </div>
+                <div class="req-item">
+                    <strong>OpenEXR</strong>
+                    <small>Required for loading/saving 16/32-bit <code>.exr</code> files.</small>
+                </div>
+                <div class="req-item">
+                    <strong>colour-science</strong>
+                    <small>Required for advanced ACES/spectral calculations.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Install -->
+        <div class="card">
+            <h2>🔧 Manual Configuration</h2>
+
+            <h3 style="margin-top:0;">Installing Optional Modules</h3>
+            <p style="color:var(--text-secondary); margin-bottom:1rem;">To enable the full feature set, install these
+                libraries if they aren't picked up automatically:</p>
+            <pre># Enable Depth Map Generation
+pip install transformers
+
+# Enable Professional EXR workflows
+pip install OpenEXR
+
+# Enable Advanced Color Science
+pip install colour-science</pre>
+
+            <h3>Troubleshooting OpenEXR on Windows</h3>
+            <p style="color:var(--text-secondary); margin-bottom:1rem;">If <code>pip install OpenEXR</code> fails on
+                Windows due to missing C++ compilers, try:</p>
+            <pre>pip install openexr-python</pre>
+            <p style="color:var(--text-secondary); font-size: 0.85rem;">Or download a pre-built wheel for your Python
+                version.</p>
+        </div>
+
+        <!-- Success -->
+        <div class="alert-box">
+            <div style="font-size: 1.5rem;">🎉</div>
+            <div>
+                <h3 style="margin:0 0 0.5rem 0; color:var(--text-primary);">Installation Complete?</h3>
+                <p style="margin:0; color:var(--text-secondary);">
+                    Head over to the <a href="tutorials.html"
+                        style="color: #fff; text-decoration: underline;">Tutorials</a> to build your first professional
+                    grading pipeline, or check <a href="node_reference.html"
+                        style="color: #fff; text-decoration: underline;">Node Reference</a> to verify all nodes are
+                    loaded.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

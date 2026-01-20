@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - FXTD Studio Radiance</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-card: rgba(35, 35, 35, 0.95);
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --text-muted: #666;
+            --border-default: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .breadcrumb {
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .breadcrumb a {
+            color: #888;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #fff;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+        }
+
+        .version {
+            background: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .version-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .version-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .version-date {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .version-tag {
+            background: #333;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .version-tag.latest {
+            background: #2a4a2a;
+            color: #8f8;
+        }
+
+        .change-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .change-section h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .change-section h3.added::before {
+            content: '+';
+            color: #6f6;
+        }
+
+        .change-section h3.changed::before {
+            content: '~';
+            color: #ff6;
+        }
+
+        .change-section h3.fixed::before {
+            content: '✓';
+            color: #6cf;
+        }
+
+        .change-section h3.removed::before {
+            content: '-';
+            color: #f66;
+        }
+
+        .change-section ul {
+            list-style: none;
+            margin-left: 1rem;
+        }
+
+        .change-section li {
+            padding: 0.4rem 0;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .change-section li:last-child {
+            border: none;
+        }
+
+        code {
+            background: #252525;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: #888;
+            text-decoration: none;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 1000;
+            color: #888;
+            font-size: 1.2rem;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background: #444;
+            color: #fff;
+        }
+
+        .theme-toggle {
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 0.35rem 0.75rem;
+            color: #888;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .theme-toggle:hover {
+            background: #444;
+            color: #fff;
+        }
+
+        body.light-theme {
+            --bg-primary: #f5f5f5;
+            --bg-card: #fff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #555;
+            --text-muted: #888;
+            --border-default: rgba(0, 0, 0, 0.1);
+        }
+
+        @media print {
+
+            nav,
+            .back-to-top {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Documentation Navigation -->
+    <nav
+        style="background: #252525; border-bottom: 1px solid #333; padding: 0.75rem 2rem; position: sticky; top: 0; z-index: 100;">
+        <div
+            style="max-width: 1440px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <a href="index.html" style="text-decoration: none; color: #e0e0e0; font-weight: 600; font-size: 1.2rem;">
+                Radiance
+            </a>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <a href="index.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Overview</a>
+                <a href="installation.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Installation</a>
+                <a href="node_reference.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Nodes</a>
+                <a href="radiance_viewer.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Viewer</a>
+                <a href="tutorials.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">Tutorials</a>
+                <a href="faq.html"
+                    style="color: #999; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.9rem;">FAQ</a>
+                <a href="changelog.html"
+                    style="color: #fff; text-decoration: none; padding: 0.35rem 0.75rem; background: #444; border-radius: 4px; font-size: 0.9rem;">Changelog</a>
+                <button id="themeToggle" class="theme-toggle"
+                    style="background: #333; border: 1px solid #444; border-radius: 4px; padding: 0.35rem 0.75rem; color: #888; cursor: pointer; font-size: 0.85rem;">☀
+                    Light</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <nav class="breadcrumb"><a href="index.html">Docs</a> › <span>Changelog</span></nav>
+
+        <header>
+            <h1>Changelog</h1>
+            <p>Version history and release notes</p>
+        </header>
+
+        <div class="version">
+            <div class="version-header">
+                <span class="version-number">v1.01</span>
+                <span class="version-date">January 2026</span>
+                <span class="version-tag latest">Latest</span>
+            </div>
+            <div class="change-section">
+                <h3 class="changed">Script Updates</h3>
+                <ul>
+                    <li><strong>nodes_loader.py</strong>: Implemented Unified Loader with FP8 weight support
+                        (e4m3fn/e5m2) and Dual CLIP loading for Flux/SD3 pipelines.</li>
+                    <li><strong>nodes_upscale.py</strong>: Introduced true 32-bit pipeline, Flux-specific presets, and
+                        multi-kernel resampling (Lanczos, Mitchell, Catmull-Rom).</li>
+                    <li><strong>nodes_hdr.py</strong>: Added OpenMP conflict fix, new HDRToneMap presets (Game Engine,
+                        Photography), and optimized GPU tonemapping.</li>
+                    <li><strong>nodes_camera.py</strong>: Added professional White Balance presets, Depth of Field with
+                        bokeh shapes, and Rolling Shutter simulation.</li>
+                    <li><strong>nodes_lut.py</strong>: Added <code>LUTCache</code> system for .cube files,
+                        GPU-accelerated trilinear interpolation, and support for multiple Log encodings (Log10, Log2,
+                        Ln).</li>
+                    <li><strong>__init__.py</strong>: Added startup dependency checks (OpenEXR, colour-science) and
+                        streamlined node registration.</li>
+                </ul>
+            </div>
+            <div class="change-section">
+                <h3 class="changed">Changed</h3>
+                <ul>
+                    <li><strong>Executor Refactor</strong>: Completely rewrote <code>executor.py</code> for improved
+                        safety, thread-safety, and performance.</li>
+                    <li><strong>Codebase Cleanup</strong>: Removed redundant nodes, test files, and consolidated node
+                        definitions.</li>
+                    <li><strong>Documentation Refinement</strong>: Removed outdated workflow docs and updated all pages
+                        with new theme consistency.</li>
+                </ul>
+            </div>
+            <div class="change-section">
+                <h3 class="fixed">Fixed</h3>
+                <ul>
+                    <li><strong>HDR Clamping</strong>: Fixed issue where 32-bit EXR values were clipped at 1.0 (reworked
+                        HDRShadowHighlightRecovery).</li>
+                    <li><strong>Radiance Viewer Display</strong>: Fixed display issue with 16-bit image types ((1,1,3),
+                        &lt;u2).</li>
+                    <li><strong>Canvas Resizing</strong>: Improved dynamic resizing behavior in Viewer.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="version">
+            <div class="version-header">
+                <span class="version-number">v1.0.0</span>
+                <span class="version-date">January 2026</span>
+            </div>
+            <div class="change-section">
+                <h3 class="added">Added</h3>
+                <ul>
+                    <li><strong>ARRI Alexa 35 Textures</strong> for Film Grain node</li>
+                    <li><strong>High Pass (Overlay)</strong> sharpening mode in Film Effects</li>
+                    <li><strong>Pre-Tonemap Sharpening</strong> for better detail preservation</li>
+                </ul>
+            </div>
+            <div class="change-section">
+                <h3 class="changed">Changed</h3>
+                <ul>
+                    <li><strong>Refined Menu Structure</strong>: Organized into localized categories (HDR, Color,
+                        Film Look, etc.)</li>
+                    <li><strong>Consolidated Nodes</strong>: Validated and merged sharpening logic into Film Effects
+                    </li>
+                    <li><strong>Optimized Preset Priorities</strong>: Master > Film > Camera > Lens hierarchy</li>
+                </ul>
+            </div>
+            <div class="change-section">
+                <h3 class="removed">Removed</h3>
+                <ul>
+                    <li>Legacy <strong>Workflow Builder</strong> node (deprecated)</li>
+                    <li><strong>Simple to Flux</strong> and <strong>Prompt Presets</strong> (features merged or
+                        deprecated)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="version">
+            <div class="version-header">
+                <span class="version-number">v1.0.0</span>
+                <span class="version-date">January 2026</span>
+            </div>
+            <ul>
+                <li>FXTD Radiance Sampler with native Flux support and sigma shifting</li>
+                <li>FXTD Workflow Builder node with AI agent and preset modes</li>
+                <li>62 professional HDR nodes for complete color pipeline</li>
+                <li>GPU-accelerated tone mapping, scopes, and upscaling</li>
+                <li>Radiance Pro Viewer with histogram, waveform, vectorscope, false color</li>
+                <li>Comprehensive documentation with interactive search</li>
+            </ul>
+        </div>
+        <div class="change-section">
+            <h3 class="changed">Changed</h3>
+            <ul>
+                <li>Consolidated GPU and CPU tone mapping into single <code>HDRToneMap</code> node</li>
+                <li>Improved waveform and vectorscope performance with vectorized operations</li>
+                <li>Reorganized node categories under FXTD STUDIO/Radiance hierarchy</li>
+            </ul>
+        </div>
+        <div class="change-section">
+            <h3 class="removed">Removed</h3>
+            <ul>
+                <li>Removed redundant <code>GPUHDRToneMap</code> node (use <code>HDRToneMap</code> with use_gpu
+                    toggle)</li>
+                <li>Removed debug scripts from distribution</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="version">
+        <div class="version-header">
+            <span class="version-number">Beta 2</span>
+            <span class="version-date">December 2025</span>
+        </div>
+        <div class="change-section">
+            <h3 class="added">Added</h3>
+            <ul>
+                <li>Film grain and halation effects with authentic emulation</li>
+                <li>30+ camera sensor simulations</li>
+                <li>20+ film stock emulations</li>
+                <li>ACES color management pipeline</li>
+            </ul>
+        </div>
+        <div class="change-section">
+            <h3 class="fixed">Fixed</h3>
+            <ul>
+                <li>HDRHistogram error handling for edge cases</li>
+                <li>EXR export color space metadata</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="version">
+        <div class="version-header">
+            <span class="version-number">Beta 1</span>
+            <span class="version-date">November 2025</span>
+        </div>
+        <div class="change-section">
+            <h3 class="added">Added</h3>
+            <ul>
+                <li>Complete 32-bit HDR processing pipeline</li>
+                <li>Professional scopes (histogram, waveform, vectorscope)</li>
+                <li>EXR file support with OpenEXR</li>
+                <li>LogC and other log curve encoding/decoding</li>
+                <li>AI upscaling with Real-ESRGAN models</li>
+                <li>Tile-based processing for large images</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="version">
+        <div class="version-header">
+            <span class="version-number">Alpha</span>
+            <span class="version-date">October 2025</span>
+        </div>
+        <div class="change-section">
+            <h3 class="added">Added</h3>
+            <ul>
+                <li>Initial development release</li>
+                <li>Basic HDR image viewer</li>
+                <li>Float32 image conversion</li>
+                <li>Basic tone mapping operators</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <p>FXTD Studios © 2024-2026</p>
+        <div style="margin-top: 0.75rem; display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+            <a href="https://www.fxtd.org" target="_blank">🌐 fxtd.org</a>
+            <a href="https://github.com/fxtdstudios" target="_blank">GitHub</a>
+            <a href="https://instagram.com/fxtdstudios" target="_blank">Instagram</a>
+            <a href="https://linkedin.com/company/fxtdstudios" target="_blank">LinkedIn</a>
+            <a href="https://vimeo.com/fxtdstudios" target="_blank">Vimeo</a>
+            <a href="https://discord.gg/fxtdstudios" target="_blank">Discord</a>
+            <a href="https://facebook.com/fxtdstudios" target="_blank">Facebook</a>
+        </div>
+    </footer>
+    </div>
+
+    <button class="back-to-top" id="backToTop">↑</button>
+
+    <script>
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => backToTop.classList.toggle('visible', window.scrollY > 300));
+        backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+        const themeToggle = document.getElementById('themeToggle');
+        if (localStorage.getItem('fxtd-docs-theme') === 'light') {
+            document.body.classList.add('light-theme');
+            themeToggle.textContent = '◐ Dark';
+        }
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            themeToggle.textContent = isLight ? '◐ Dark' : '☀ Light';
+            localStorage.setItem('fxtd-docs-theme', isLight ? 'light' : 'dark');
+        });
+    </script>
+</body>
+
+</html>
