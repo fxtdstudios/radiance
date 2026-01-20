@@ -2,191 +2,14 @@
   "id": "4786d9a6-a62a-42dd-8a2e-0fed1988f572",
   "revision": 0,
   "last_node_id": 477,
-  "last_link_id": 752,
+  "last_link_id": 753,
   "nodes": [
-    {
-      "id": 157,
-      "type": "Note",
-      "pos": [
-        15720.000268582175,
-        -4470.00004782158
-      ],
-      "size": [
-        413.609375,
-        803.28125
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "properties": {},
-      "widgets_values": [
-        "FXTD STUDIOS\nwww.FXTD.org\n\nhttps://github.com/fxtdstudios\n\nhttps://linktr.ee/fxtdstudio\n\n\nThis workflow work with FLUX models \nFLUX.1-Krea-dev\nhttps://huggingface.co/black-forest-labs/FLUX.1-Krea-dev/tree/main\n\n\n"
-      ],
-      "color": "#432",
-      "bgcolor": "#653",
-      "shape": 4
-    },
-    {
-      "id": 186,
-      "type": "PreviewImage",
-      "pos": [
-        24910.001814672232,
-        -5240.000277168504
-      ],
-      "size": [
-        2340,
-        1500
-      ],
-      "flags": {},
-      "order": 15,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 374
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.8.2",
-        "Node name for S&R": "PreviewImage"
-      },
-      "widgets_values": []
-    },
-    {
-      "id": 187,
-      "type": "PreviewImage",
-      "pos": [
-        24920.00031028061,
-        -3709.9995390698605
-      ],
-      "size": [
-        2320,
-        1520
-      ],
-      "flags": {},
-      "order": 13,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 373
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.8.2",
-        "Node name for S&R": "PreviewImage"
-      },
-      "widgets_values": []
-    },
-    {
-      "id": 194,
-      "type": "LoadImage",
-      "pos": [
-        15730.001673534269,
-        -5340.000392464262
-      ],
-      "size": [
-        429.734375,
-        837.8125
-      ],
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": null
-        },
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": null
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.8.2",
-        "Node name for S&R": "LoadImage"
-      },
-      "widgets_values": [
-        "FLOGO.png",
-        "image"
-      ],
-      "shape": 4
-    },
-    {
-      "id": 230,
-      "type": "HDR360Generate",
-      "pos": [
-        22790.00270849125,
-        -4609.999964238277
-      ],
-      "size": [
-        421.25,
-        491.875
-      ],
-      "flags": {},
-      "order": 12,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "source_image",
-          "type": "IMAGE",
-          "link": 749
-        }
-      ],
-      "outputs": [
-        {
-          "name": "panorama",
-          "type": "IMAGE",
-          "links": [
-            373,
-            752
-          ]
-        },
-        {
-          "name": "projection_map",
-          "type": "IMAGE",
-          "links": [
-            374
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "radiance",
-        "ver": "6d452a3ce4b9154ffb58f0405e654a2998d47327",
-        "Node name for S&R": "HDR360Generate"
-      },
-      "widgets_values": [
-        "Angular_Map",
-        4096,
-        2048,
-        360,
-        180,
-        0,
-        0,
-        0,
-        "Lanczos",
-        "Mirror",
-        0
-      ]
-    },
     {
       "id": 254,
       "type": "FXTDHelp",
       "pos": [
-        17755.56118587565,
-        -5800.437875626078
+        17755.558579908557,
+        -5800.437063284057
       ],
       "size": [
         508.4375,
@@ -195,7 +18,7 @@
       "flags": {
         "pinned": true
       },
-      "order": 2,
+      "order": 0,
       "mode": 0,
       "inputs": [
         {
@@ -223,42 +46,18 @@
       "shape": 4
     },
     {
-      "id": 256,
-      "type": "Note",
-      "pos": [
-        15740.001853499532,
-        -5519.999497508485
-      ],
-      "size": [
-        412.546875,
-        160.9375
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "properties": {},
-      "widgets_values": [
-        "select the docs and run the node"
-      ],
-      "color": "#432",
-      "bgcolor": "#653",
-      "shape": 4
-    },
-    {
       "id": 320,
       "type": "PreviewImage",
       "pos": [
-        17700.002520813534,
-        -4180.005853710351
+        17700.001369518297,
+        -4180.006419478503
       ],
       "size": [
         690,
         785.90625
       ],
       "flags": {},
-      "order": 6,
+      "order": 3,
       "mode": 0,
       "inputs": [
         {
@@ -279,15 +78,15 @@
       "id": 321,
       "type": "FXTDResolution",
       "pos": [
-        16720.75754465896,
-        -4539.9994700981915
+        16720.7577714739,
+        -4540.000035866345
       ],
       "size": [
-        537.546875,
+        537.5625,
         529.21875
       ],
       "flags": {},
-      "order": 4,
+      "order": 1,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -344,15 +143,15 @@
       "id": 435,
       "type": "FXTD_Radiance_Sampler_Pro",
       "pos": [
-        18690.001656325614,
-        -4429.999481083874
+        18690.00173001721,
+        -4430.0000468520275
       ],
       "size": [
         427.03125,
         595.9375
       ],
       "flags": {},
-      "order": 8,
+      "order": 5,
       "mode": 0,
       "inputs": [
         {
@@ -396,7 +195,7 @@
         "Node name for S&R": "FXTD_Radiance_Sampler_Pro"
       },
       "widgets_values": [
-        984411057512577,
+        98379163546558,
         "randomize",
         "🎨 Flux txt2img",
         20,
@@ -416,15 +215,15 @@
       "id": 438,
       "type": "FXTDRadianceLoader",
       "pos": [
-        16710.000935327793,
-        -5549.999424910864
+        16709.998252799018,
+        -5550.0000672406995
       ],
       "size": [
         588.125,
-        398.484375
+        398.5
       ],
       "flags": {},
-      "order": 5,
+      "order": 2,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -457,7 +256,7 @@
       },
       "widgets_values": [
         "flux1-krea-dev.safetensors",
-        "fp32",
+        "default",
         "t5xxl_fp16.safetensors",
         "clip_l.safetensors",
         "flux",
@@ -467,66 +266,18 @@
       "shape": 4
     },
     {
-      "id": 447,
-      "type": "HDRToneMap",
-      "pos": [
-        21440.00046294341,
-        -4810.000194829795
-      ],
-      "size": [
-        496.5625,
-        442.8125
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 4,
-      "inputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "link": 747
-        }
-      ],
-      "outputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "links": [
-            749
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "radiance",
-        "ver": "6d452a3ce4b9154ffb58f0405e654a2998d47327",
-        "Node name for S&R": "HDRToneMap"
-      },
-      "widgets_values": [
-        "🎬 Cinematic Film",
-        "filmic_aces",
-        0,
-        2.2,
-        1,
-        1,
-        1,
-        0.5,
-        0,
-        true
-      ]
-    },
-    {
       "id": 460,
       "type": "FXTDCinematicPromptEncoder",
       "pos": [
-        17689.999890874613,
-        -5249.9995383936475
+        17689.997361469195,
+        -5250.000104161805
       ],
       "size": [
-        698.3125,
-        1019.375
+        698.328125,
+        1019.390625
       ],
       "flags": {},
-      "order": 7,
+      "order": 4,
       "mode": 0,
       "inputs": [
         {
@@ -558,7 +309,7 @@
       },
       "widgets_values": [
         "A cinematic scene...Close view of gloved hands adjusting mechanical switches and controls, slow deliberate movement, aircraft vibration unchanged,",
-        "🚀 Sci-Fi Cinematic",
+        "⚡ Action / Dynamic",
         "Medium Shot (MS)",
         "ARRI Alexa 35",
         "50mm Standard Prime",
@@ -582,15 +333,15 @@
       "id": 466,
       "type": "RadianceVAEDecode",
       "pos": [
-        19540.001028544357,
-        -4839.999509738762
+        19200.000514998097,
+        -4800.000121262625
       ],
       "size": [
         460,
         168.71875
       ],
       "flags": {},
-      "order": 9,
+      "order": 6,
       "mode": 0,
       "inputs": [
         {
@@ -624,18 +375,146 @@
       ]
     },
     {
+      "id": 468,
+      "type": "LogCurveEncode",
+      "pos": [
+        21640,
+        -4190
+      ],
+      "size": [
+        440,
+        256.65625
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 753
+        }
+      ],
+      "outputs": [
+        {
+          "name": "log_encoded",
+          "type": "IMAGE",
+          "links": [
+            728
+          ]
+        },
+        {
+          "name": "curve_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "radiance",
+        "ver": "6d452a3ce4b9154ffb58f0405e654a2998d47327",
+        "Node name for S&R": "LogCurveEncode"
+      },
+      "widgets_values": [
+        "ARRI LogC4 (ALEXA 35)",
+        true,
+        2.2,
+        0,
+        true
+      ]
+    },
+    {
+      "id": 470,
+      "type": "FXTDRealisticGrain",
+      "pos": [
+        22310,
+        -4160
+      ],
+      "size": [
+        470,
+        270
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 728
+        }
+      ],
+      "outputs": [
+        {
+          "name": "grained_image",
+          "type": "IMAGE",
+          "links": [
+            730,
+            749,
+            750
+          ]
+        },
+        {
+          "name": "preset_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "radiance",
+        "ver": "6d452a3ce4b9154ffb58f0405e654a2998d47327",
+        "Node name for S&R": "FXTDRealisticGrain"
+      },
+      "widgets_values": [
+        "ARRI Alexa 35",
+        1,
+        800,
+        268578640,
+        "randomize",
+        true
+      ]
+    },
+    {
+      "id": 471,
+      "type": "PreviewImage",
+      "pos": [
+        23470,
+        -3640
+      ],
+      "size": [
+        1410,
+        909.421875
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 730
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
       "id": 472,
       "type": "FXTDAIUpscale",
       "pos": [
-        20470.00138111515,
-        -4689.9994133568
+        19830.00172752803,
+        -4590.000016952548
       ],
       "size": [
         390,
         340
       ],
       "flags": {},
-      "order": 10,
+      "order": 7,
       "mode": 0,
       "inputs": [
         {
@@ -649,7 +528,7 @@
           "name": "image",
           "type": "IMAGE",
           "links": [
-            747
+            751
           ]
         },
         {
@@ -672,24 +551,24 @@
       ]
     },
     {
-      "id": 477,
+      "id": 473,
       "type": "FXTDSaveEXR",
       "pos": [
-        24900.00040972014,
-        -6080.000235038746
+        23530,
+        -4920
       ],
       "size": [
         400,
         603.140625
       ],
       "flags": {},
-      "order": 14,
+      "order": 13,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 752
+          "link": 749
         }
       ],
       "outputs": [
@@ -715,7 +594,7 @@
         "Node name for S&R": "FXTDSaveEXR"
       },
       "widgets_values": [
-        "output\\hdri_01",
+        "output\\exr",
         "16-bit Half Float",
         "ZIP",
         "Linear",
@@ -729,25 +608,217 @@
         "",
         "ACEScg"
       ]
+    },
+    {
+      "id": 475,
+      "type": "FXTD_RadianceViewer",
+      "pos": [
+        25570,
+        -4870
+      ],
+      "size": [
+        900,
+        600
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 750
+        },
+        {
+          "name": "compare_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "radiance",
+        "ver": "6d452a3ce4b9154ffb58f0405e654a2998d47327",
+        "Node name for S&R": "FXTD_RadianceViewer"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 476,
+      "type": "FXTDPhysicalCamera",
+      "pos": [
+        20540,
+        -5960
+      ],
+      "size": [
+        510,
+        1280
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 751
+        },
+        {
+          "name": "depth_map",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            752
+          ]
+        },
+        {
+          "name": "camera_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "radiance",
+        "ver": "6d452a3ce4b9154ffb58f0405e654a2998d47327",
+        "Node name for S&R": "FXTDPhysicalCamera"
+      },
+      "widgets_values": [
+        "Custom",
+        "1/48",
+        "f/2.8",
+        800,
+        0,
+        "Full Frame (36x24mm)",
+        true,
+        "Daylight (5500K)",
+        5600,
+        0,
+        false,
+        0.5,
+        5,
+        "Circle",
+        false,
+        0.3,
+        0.8,
+        false,
+        1,
+        false,
+        0,
+        0,
+        false,
+        "Directional",
+        0,
+        false,
+        0,
+        0,
+        false,
+        "Subtle Handheld",
+        1,
+        true,
+        0,
+        "randomize"
+      ]
+    },
+    {
+      "id": 477,
+      "type": "FXTDProFilmEffects",
+      "pos": [
+        21300,
+        -6140
+      ],
+      "size": [
+        710,
+        1478.6875
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 752
+        }
+      ],
+      "outputs": [
+        {
+          "name": "processed_image",
+          "type": "IMAGE",
+          "links": [
+            753
+          ]
+        },
+        {
+          "name": "effect_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "radiance",
+        "ver": "6d452a3ce4b9154ffb58f0405e654a2998d47327",
+        "Node name for S&R": "FXTDProFilmEffects"
+      },
+      "widgets_values": [
+        "35mm Clean",
+        1,
+        "None",
+        "None",
+        "None",
+        true,
+        0,
+        "randomize",
+        true,
+        false,
+        0.15,
+        1,
+        0.3,
+        1.5,
+        0.8,
+        true,
+        0.15,
+        0.75,
+        50,
+        1,
+        0.3,
+        0.2,
+        true,
+        0.1,
+        true,
+        0.08,
+        0.8,
+        30,
+        true,
+        0.25,
+        2,
+        1,
+        false,
+        0,
+        0,
+        false,
+        0.2,
+        0.6,
+        false,
+        2,
+        false,
+        "Unsharp Mask",
+        0.5,
+        1,
+        0
+      ]
     }
   ],
   "links": [
-    [
-      373,
-      230,
-      0,
-      187,
-      0,
-      "IMAGE"
-    ],
-    [
-      374,
-      230,
-      1,
-      186,
-      0,
-      "IMAGE"
-    ],
     [
       525,
       321,
@@ -813,6 +884,22 @@
       "VAE"
     ],
     [
+      728,
+      468,
+      0,
+      470,
+      0,
+      "IMAGE"
+    ],
+    [
+      730,
+      470,
+      0,
+      471,
+      0,
+      "IMAGE"
+    ],
+    [
       733,
       466,
       0,
@@ -821,26 +908,42 @@
       "IMAGE"
     ],
     [
-      747,
-      472,
+      749,
+      470,
       0,
-      447,
+      473,
       0,
       "IMAGE"
     ],
     [
-      749,
-      447,
+      750,
+      470,
       0,
-      230,
+      475,
+      0,
+      "IMAGE"
+    ],
+    [
+      751,
+      472,
+      0,
+      476,
       0,
       "IMAGE"
     ],
     [
       752,
-      230,
+      476,
       0,
       477,
+      0,
+      "IMAGE"
+    ],
+    [
+      753,
+      477,
+      0,
+      468,
       0,
       "IMAGE"
     ]
@@ -849,10 +952,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.7972024500000101,
+      "scale": 0.7247295000000081,
       "offset": [
-        -22531.22286309839,
-        6936.26140339018
+        -19277.636551520707,
+        6687.8496029738535
       ]
     },
     "frontendVersion": "1.35.9",
