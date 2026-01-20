@@ -1195,7 +1195,8 @@ class FXTDSharpen32bit:
                 
                 # Apply amount
                 result = img + detail * amount
-                result = torch.clamp(result, 0, 1)
+                # HDR: Only clamp negatives, preserve super-white values
+                result = torch.clamp(result, min=0)
                 
                 return (result.cpu(),)
                 
@@ -1333,7 +1334,8 @@ class FXTDDownscale32bit:
                 
                 # Permute back to BHWC
                 result = result.permute(0, 2, 3, 1)
-                result = torch.clamp(result, 0, 1)
+                # HDR: Preserve super-white values, only clamp negatives
+                result = torch.clamp(result, min=0)
                 
                 return (result.cpu(), new_w, new_h)
                 
@@ -1394,7 +1396,10 @@ class FXTDDownscale32bit:
 
 class FXTDBitDepthConvert:
     """
-    Convert between bit depths with dithering support.
+    Convert between bit depths with professional dithering support.
+    
+    Supports Floyd-Steinberg, Ordered (Bayer), and Blue Noise dithering
+    to minimize banding artifacts when converting to lower bit depths.
     """
     
     def __init__(self):
@@ -1404,25 +1409,32 @@ class FXTDBitDepthConvert:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE",),
-                "output_depth": (["32-bit Float", "16-bit Float", "16-bit Int", "10-bit", "8-bit"],),
+                "image": ("IMAGE", {"tooltip": "Input image in float32 format."}),
+                "output_depth": (["32-bit Float", "16-bit Float", "16-bit Int", "10-bit", "8-bit"], {
+                    "tooltip": "Target bit depth. 32-bit = full precision, 16-bit float = HDR, 10-bit = broadcast, 8-bit = web/SDR."
+                }),
             },
             "optional": {
-                "dithering": (["None", "Floyd-Steinberg", "Ordered", "Blue Noise"],),
+                "dithering": (["None", "Floyd-Steinberg", "Ordered", "Blue Noise"], {
+                    "default": "None",
+                    "tooltip": "Dithering algorithm: Floyd-Steinberg (error diffusion), Ordered (Bayer), Blue Noise (high-frequency)."
+                }),
                 "dither_strength": ("FLOAT", {
                     "default": 1.0,
                     "min": 0.0,
                     "max": 2.0,
-                    "step": 0.1
+                    "step": 0.1,
+                    "tooltip": "Dithering intensity. 1.0 = standard, <1 = subtle, >1 = aggressive."
                 }),
             }
         }
     
     RETURN_TYPES = ("IMAGE", "STRING")
     RETURN_NAMES = ("converted_image", "bit_depth_info")
+    OUTPUT_TOOLTIPS = ("Image quantized to target bit depth.", "Information about the conversion.")
     FUNCTION = "convert"
     CATEGORY = "FXTD Studios/Radiance/Upscale"
-    DESCRIPTION = "Convert between bit depths with optional dithering."
+    DESCRIPTION = "Convert between bit depths with professional dithering to reduce banding."
     
     def convert(self, image: torch.Tensor, output_depth: str,
                 dithering: str = "None", dither_strength: float = 1.0):
@@ -1556,22 +1568,23 @@ class FXTDAIUpscale:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE",),
-                "model_name": (cls.AI_MODELS, {"default": "RealESRGAN_x4plus"}),
-                "tile_size": ("INT", {"default": 512, "min": 128, "max": 1024, "step": 64}),
-                "tile_overlap": ("INT", {"default": 32, "min": 0, "max": 128, "step": 8}),
-                "auto_download": ("BOOLEAN", {"default": True}),
+                "image": ("IMAGE", {"tooltip": "Input image to upscale."}),
+                "model_name": (cls.AI_MODELS, {"default": "RealESRGAN_x4plus", "tooltip": "AI upscaling model. RealESRGAN_x4plus is recommended for general use."}),
+                "tile_size": ("INT", {"default": 512, "min": 128, "max": 1024, "step": 64, "tooltip": "Tile size for processing. Smaller = less VRAM, slower. 512 recommended."}),
+                "tile_overlap": ("INT", {"default": 32, "min": 0, "max": 128, "step": 8, "tooltip": "Overlap between tiles to avoid seams. 32-64 recommended."}),
+                "auto_download": ("BOOLEAN", {"default": True, "tooltip": "Automatically download models if not found."}),
             },
             "optional": {
-                "unload_model": ("BOOLEAN", {"default": False, "tooltip": "Unload model from VRAM after processing to free memory"}),
+                "unload_model": ("BOOLEAN", {"default": False, "tooltip": "Unload model from VRAM after processing to free memory."}),
             }
         }
 
     RETURN_TYPES = ("IMAGE", "STRING")
     RETURN_NAMES = ("image", "info")
+    OUTPUT_TOOLTIPS = ("Upscaled image.", "Information about the upscaling process.")
     FUNCTION = "upscale"
     CATEGORY = "FXTD Studios/Radiance/Upscale"
-    DESCRIPTION = "AI-powered upscaling using neural network models."
+    DESCRIPTION = "AI-powered upscaling using neural network models. Supports tiled processing for large images."
 
     def _download_model(self, model_name: str, target_path: str) -> bool:
         """Download model if URL is available."""
@@ -1671,25 +1684,36 @@ class FXTDAIUpscale:
         elif "x8" in model_name.lower():
             scale = 8
         
-        # Use scipy/PIL for upscaling
-        from PIL import Image
-        import numpy as np
+        # Use torch for GPU-accelerated upscaling
+        b, h, w, c = image.shape
+        new_h, new_w = h * scale, w * scale
         
-        result_images = []
-        for i in range(image.shape[0]):
-            img_np = (image[i].cpu().numpy() * 255).astype(np.uint8)
-            pil_img = Image.fromarray(img_np)
-            new_size = (pil_img.width * scale, pil_img.height * scale)
-            upscaled = pil_img.resize(new_size, Image.LANCZOS)
-            result_np = np.array(upscaled).astype(np.float32) / 255.0
-            result_images.append(torch.from_numpy(result_np))
+        # Permute to BCHW for interpolate
+        img_bchw = image.permute(0, 3, 1, 2)
         
-        return (torch.stack(result_images), f"Lanczos {scale}x (AI model not available)")
+        # Use bicubic (closest to Lanczos in torch)
+        upscaled = torch.nn.functional.interpolate(
+            img_bchw, size=(new_h, new_w), mode='bicubic', align_corners=False
+        )
+        
+        # Permute back to BHWC
+        result = upscaled.permute(0, 2, 3, 1)
+        # HDR: Preserve super-white values, only clamp negatives
+        result = torch.clamp(result, min=0)
+        
+        return (result, f"Bicubic {scale}x (AI model not available)")
+
+    def _process_tile(self, tile: torch.Tensor, model, device) -> torch.Tensor:
+        """Process a single tile through the model."""
+        with torch.no_grad():
+            tile_input = tile.to(device)
+            output = model(tile_input)
+            return output
 
     def upscale(self, image, model_name: str = "RealESRGAN_x4plus",
                 tile_size: int = 512, tile_overlap: int = 32,
                 auto_download: bool = True, unload_model: bool = False):
-        """Upscale image using AI model."""
+        """Upscale image using AI model with tiled processing."""
         
         # Load model if needed
         if self.model is None or self.current_model_name != model_name:
@@ -1705,19 +1729,91 @@ class FXTDAIUpscale:
             device = model_management.get_torch_device()
             self.model = self.model.to(device)
             
+            # Determine scale factor from model (try to infer from a test)
+            scale = 4  # Default
+            if "x2" in model_name.lower():
+                scale = 2
+            elif "x8" in model_name.lower():
+                scale = 8
+            
             result_images = []
             
-            for i in range(image.shape[0]):
-                img = image[i:i+1].permute(0, 3, 1, 2).to(device)
+            for batch_idx in range(image.shape[0]):
+                img = image[batch_idx:batch_idx+1].permute(0, 3, 1, 2)  # BHWC -> BCHW
+                _, c, h, w = img.shape
                 
-                with torch.no_grad():
-                    output = self.model(img)
-                
-                output = output.permute(0, 2, 3, 1).cpu()
-                result_images.append(output[0])
+                # Check if tiling is needed
+                if h <= tile_size and w <= tile_size:
+                    # Small image - process directly
+                    with torch.no_grad():
+                        img_device = img.to(device)
+                        output = self.model(img_device)
+                    result_images.append(output.permute(0, 2, 3, 1)[0])  # BCHW -> BHWC
+                else:
+                    # Large image - use tiled processing
+                    new_h, new_w = h * scale, w * scale
+                    output = torch.zeros((1, c, new_h, new_w), dtype=torch.float32, device=device)
+                    weight = torch.zeros((1, 1, new_h, new_w), dtype=torch.float32, device=device)
+                    
+                    # Calculate tile positions
+                    stride = tile_size - tile_overlap
+                    tiles_x = max(1, math.ceil((w - tile_overlap) / stride))
+                    tiles_y = max(1, math.ceil((h - tile_overlap) / stride))
+                    
+                    print(f"[FXTD AI Upscale] Processing {tiles_x * tiles_y} tiles ({tiles_x}x{tiles_y})...")
+                    
+                    for ty in range(tiles_y):
+                        for tx in range(tiles_x):
+                            # Calculate input tile coordinates
+                            x1 = min(tx * stride, w - tile_size)
+                            y1 = min(ty * stride, h - tile_size)
+                            x2 = min(x1 + tile_size, w)
+                            y2 = min(y1 + tile_size, h)
+                            
+                            # Handle edge cases
+                            x1 = max(0, x2 - tile_size)
+                            y1 = max(0, y2 - tile_size)
+                            
+                            # Extract tile
+                            tile = img[:, :, y1:y2, x1:x2].to(device)
+                            
+                            # Process tile
+                            with torch.no_grad():
+                                tile_output = self.model(tile)
+                            
+                            # Calculate output coordinates
+                            out_x1 = x1 * scale
+                            out_y1 = y1 * scale
+                            out_x2 = x2 * scale
+                            out_y2 = y2 * scale
+                            
+                            # Create blending weight (feather edges)
+                            th, tw = tile_output.shape[2], tile_output.shape[3]
+                            tile_weight = torch.ones((1, 1, th, tw), dtype=torch.float32, device=device)
+                            
+                            # Feather edges for blending
+                            if tile_overlap > 0:
+                                feather = tile_overlap * scale
+                                for i in range(feather):
+                                    alpha = (i + 1) / feather
+                                    tile_weight[:, :, i, :] *= alpha
+                                    tile_weight[:, :, th - 1 - i, :] *= alpha
+                                    tile_weight[:, :, :, i] *= alpha
+                                    tile_weight[:, :, :, tw - 1 - i] *= alpha
+                            
+                            # Accumulate
+                            output[:, :, out_y1:out_y2, out_x1:out_x2] += tile_output * tile_weight
+                            weight[:, :, out_y1:out_y2, out_x1:out_x2] += tile_weight
+                    
+                    # Normalize by weight
+                    output = output / (weight + 1e-8)
+                    result_images.append(output.permute(0, 2, 3, 1)[0])  # BCHW -> BHWC
             
+            # Stack results
             result = torch.stack(result_images)
-            info = f"Upscaled with {model_name}"
+            # HDR: Preserve super-white values, only clamp negatives
+            result = torch.clamp(result, min=0)
+            info = f"Upscaled with {model_name} ({scale}x) [HDR preserved]"
             
             # Unload model if requested to free VRAM
             if unload_model:
@@ -1731,6 +1827,8 @@ class FXTDAIUpscale:
             
         except Exception as e:
             print(f"[FXTD AI Upscale] Error during upscale: {e}")
+            import traceback
+            traceback.print_exc()
             return self._fallback_upscale(image, model_name)
 
 
@@ -1745,11 +1843,11 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "FXTDProUpscale": "⬆️ Radiance Pro Upscale",
-    "FXTDUpscaleBySize": "📐 Radiance Upscale By Size",
-    "FXTDUpscaleTiled": "🔲 Radiance Upscale Tiled",
-    "FXTDDownscale32bit": "⬇️ Radiance Downscale 32-bit",
-    "FXTDBitDepthConvert": "🎚️ Radiance Bit Depth Convert",
-    "FXTDAIUpscale": "🤖 Radiance AI Upscale",
+    "FXTDProUpscale": "◆ Radiance Pro Upscale",
+    "FXTDUpscaleBySize": "◆ Radiance Upscale By Size",
+    "FXTDUpscaleTiled": "◆ Radiance Upscale Tiled",
+    "FXTDDownscale32bit": "◆ Radiance Downscale 32-bit",
+    "FXTDBitDepthConvert": "◆ Radiance Bit Depth Convert",
+    "FXTDAIUpscale": "◆ Radiance AI Upscale",
 }
 

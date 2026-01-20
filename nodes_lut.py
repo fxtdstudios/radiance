@@ -106,7 +106,10 @@ class RadianceLUTApply:
             },
             "optional": {
                 "log_encoding": (cls.LOG_ENCODINGS, {"default": "Log10"}),
-                "clamp_output": ("BOOLEAN", {"default": True}),
+                "clamp_output": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "Clamp output to 0-1 range. Disable for HDR workflows to preserve super-white values."
+                }),
             }
         }
     
@@ -447,9 +450,12 @@ Features:
         if strength < 1.0:
             result = image * (1.0 - strength) + result * strength
         
-        # Clamp output to valid range
+        # Clamp output to valid range (only if requested - disabled by default for HDR)
         if clamp_output:
             result = torch.clamp(result, 0.0, 1.0)
+        else:
+            # HDR: Only clamp negatives to preserve super-whites
+            result = torch.clamp(result, min=0.0)
         
         return (result,)
 
@@ -491,7 +497,10 @@ class RadianceGPUColorMatrix:
             "optional": {
                 "a_vector": ("STRING", {"default": "0.0, 0.0, 0.0, 1.0", "multiline": False}),
                 "offset": ("STRING", {"default": "0.0, 0.0, 0.0", "multiline": False}),
-                "clamp_output": ("BOOLEAN", {"default": True}),
+                "clamp_output": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "Clamp output to 0-1 range. Disable for HDR workflows to preserve super-white values."
+                }),
             }
         }
 
@@ -685,9 +694,12 @@ Features:
         # Reshape back to image dimensions
         result = result.reshape(B, H, W, -1)
         
-        # Clamp to valid range if requested
+        # Clamp to valid range if requested (disabled by default for HDR)
         if clamp_output:
             result = torch.clamp(result, 0.0, 1.0)
+        else:
+            # HDR: Only clamp negatives to preserve super-whites
+            result = torch.clamp(result, min=0.0)
         
         return (result,)
 
@@ -699,6 +711,6 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "RadianceLUTApply": "Radiance LUT Apply",
-    "RadianceGPUColorMatrix": "Radiance GPU Color Matrix"
+    "RadianceLUTApply": "◆ Radiance LUT Apply",
+    "RadianceGPUColorMatrix": "◆ Radiance GPU Color Matrix"
 }

@@ -356,5 +356,5 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "FXTDResolution": "📐 Radiance Resolution",
+    "FXTDResolution": "◆ Radiance Resolution",
 }

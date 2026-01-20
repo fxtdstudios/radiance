@@ -238,7 +238,8 @@ class FXTDWhiteBalance:
             output[..., 1] *= g_mult
             output[..., 2] *= b_mult
             
-            output = torch.clamp(output, 0, 1)
+            # HDR: Preserve super-white values, only clamp negatives
+            output = torch.clamp(output, min=0)
             return (output.cpu(),)
             
         except RuntimeError:
@@ -381,7 +382,8 @@ class FXTDDepthOfField:
                 boost = 1.0 + (highlight_boost - 1.0) * highlight_mask.unsqueeze(-1)
                 output = output * boost
             
-            output = torch.clamp(output, 0, 1)
+            # HDR: Preserve super-white values (important for bokeh highlights)
+            output = torch.clamp(output, min=0)
             return (output.cpu(),)
             
         except RuntimeError:
@@ -549,7 +551,8 @@ class FXTDMotionBlur:
                     output += sampled
             
             output = output / samples
-            output = torch.clamp(output, 0, 1)
+            # HDR: Preserve super-white values
+            output = torch.clamp(output, min=0)
             return (output.cpu(),)
             
         except RuntimeError:
@@ -687,7 +690,8 @@ class FXTDRollingShutter:
                 band_mask = band_mask.unsqueeze(0).unsqueeze(-1)
                 output = output + band_mask * 0.3  # Flash brightness
             
-            output = torch.clamp(output, 0, 1)
+            # HDR: Preserve super-white values
+            output = torch.clamp(output, min=0)
             return (output.cpu(),)
             
         except RuntimeError:
@@ -1693,9 +1697,9 @@ Each effect can be enabled/disabled."""
                 img = torch.cat(results, dim=0)
             
             # ═══════════════════════════════════════════════════════════
-            # FINALIZE
+            # FINALIZE - HDR: Preserve super-white values
             # ═══════════════════════════════════════════════════════════
-            img = torch.clamp(img, 0, 1)
+            img = torch.clamp(img, min=0)
             
             # Build camera info string
             camera_info = f"""═══ PHYSICAL CAMERA SETTINGS ═══
@@ -1741,12 +1745,12 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "FXTDWhiteBalance": "🎨 Radiance White Balance",
-    "FXTDDepthOfField": "🔍 Radiance Depth of Field",
-    "FXTDMotionBlur": "💨 Radiance Motion Blur",
-    "FXTDRollingShutter": "📷 Radiance Rolling Shutter",
-    "FXTDCompressionArtifacts": "📦 Radiance Compression Artifacts",
-    "FXTDCameraShake": "📳 Radiance Camera Shake",
-    "FXTDPhysicalCamera": "📷 Radiance Physical Camera",
+    "FXTDWhiteBalance": "◆ Radiance White Balance",
+    "FXTDDepthOfField": "◆ Radiance Depth of Field",
+    "FXTDMotionBlur": "◆ Radiance Motion Blur",
+    "FXTDRollingShutter": "◆ Radiance Rolling Shutter",
+    "FXTDCompressionArtifacts": "◆ Radiance Compression Artifacts",
+    "FXTDCameraShake": "◆ Radiance Camera Shake",
+    "FXTDPhysicalCamera": "◆ Radiance Physical Camera",
 }
 

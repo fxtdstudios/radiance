@@ -226,5 +226,5 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "FXTD_RadianceViewer": "🎬 Radiance Viewer",
+    "FXTD_RadianceViewer": "◆ Radiance Viewer",
 }

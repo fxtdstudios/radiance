@@ -305,26 +305,64 @@ class FXTD_Radiance_Sampler_Pro:
         # Execute sampling
         # ─────────────────────────────────────────────────────────────────
         t0 = time.time()
-        samples = comfy.sample.sample(
-            model,
-            noise,
-            steps,
-            cfg,
-            sampler,
-            scheduler,
-            positive,
-            negative,
-            latent_samples,
-            denoise=denoise,
-            disable_noise=not add_noise,
-            start_step=actual_start,
-            last_step=actual_end,
-            force_full_denoise=not return_with_leftover_noise,
-            noise_mask=noise_mask,
-            callback=None,
-            disable_pbar=False,
-            seed=seed
-        )
+        
+        # Use custom sigmas when flux_shift is applied
+        if sigmas is not None and len(sigmas) > 0 and flux_shift != 1.0:
+            # Use low-level sampler with custom sigmas for flux shift
+            sampler_obj = comfy.samplers.KSampler(
+                model, 
+                steps=steps,
+                device=comfy.model_management.get_torch_device(),
+                sampler=sampler,
+                scheduler=scheduler,
+                denoise=denoise,
+                model_options=model.model_options
+            )
+            
+            # Prepare for sampling
+            if add_noise:
+                latent_input = latent_samples + noise * sigmas[0]
+            else:
+                latent_input = latent_samples
+            
+            # Sample with custom sigmas
+            samples = comfy.samplers.sample(
+                model,
+                latent_input,
+                positive,
+                negative,
+                cfg,
+                model.load_device,
+                sampler_obj.sampler,
+                sigmas,
+                model_options=model.model_options,
+                denoise_mask=noise_mask,
+                callback=None,
+                disable_pbar=False,
+                seed=seed
+            )
+        else:
+            # Standard sampling path (no shift)
+            samples = comfy.sample.sample(
+                model,
+                noise,
+                steps,
+                cfg,
+                sampler,
+                scheduler,
+                positive,
+                negative,
+                latent_samples,
+                denoise=denoise,
+                disable_noise=not add_noise,
+                start_step=actual_start,
+                last_step=actual_end,
+                force_full_denoise=not return_with_leftover_noise,
+                noise_mask=noise_mask,
+                callback=None,
+                disable_pbar=False,
+                seed=seed
+            )
         timings["sampling"] = time.time() - t0
         
         # ─────────────────────────────────────────────────────────────────
@@ -381,5 +419,5 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "FXTD_Radiance_Sampler_Pro": "⚡ Radiance Sampler Pro",
+    "FXTD_Radiance_Sampler_Pro": "◆ Radiance Sampler Pro",
 }

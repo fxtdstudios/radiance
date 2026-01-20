@@ -25,14 +25,14 @@ import numpy as np
 import struct
 
 # Robust EXR writer using OpenCV
-def write_exr_cv2(filepath: str, image: np.ndarray, bit_depth: str = "float32"):
+def write_exr_cv2(filepath: str, image: np.ndarray, bit_depth: str = "float32", compression: str = "ZIP"):
     """
     Write EXR using OpenCV - most reliable cross-platform method.
     
     Args:
         filepath: Output file path
         image: HWC numpy array (RGB or RGBA)
-        bit_depth: "float32" or "float16" (float16 will be converted)
+        bit_depth: "float32" or "float16" (half)
     """
     import cv2
     import os
@@ -40,22 +40,39 @@ def write_exr_cv2(filepath: str, image: np.ndarray, bit_depth: str = "float32"):
     # Ensure directory exists
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
     
-    # Convert to float32
+    # Convert to float32 (OpenCV expects float32 input even for float16 save)
     img = image.astype(np.float32)
     
     # Convert RGB to BGR for OpenCV
+    # OpenCV uses BGR internally
     if img.ndim == 3:
         if img.shape[2] == 3:
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         elif img.shape[2] == 4:
             img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGRA)
     
+    # Set EXR type flags
+    exr_flags = [cv2.IMWRITE_EXR_TYPE, cv2.IMWRITE_EXR_TYPE_FLOAT] # Default 32-bit
+    
+    if "16" in str(bit_depth) or "half" in str(bit_depth).lower():
+        exr_flags = [cv2.IMWRITE_EXR_TYPE, cv2.IMWRITE_EXR_TYPE_HALF]
+    
+    # Compression flags (OpenCV might not support all, but we can try)
+    # OpenCV EXR compression parameter is not well documented but generally uses ZIP by default
+    
     # Write EXR
-    success = cv2.imwrite(filepath, img)
-    if success:
-        print(f"[FXTD EXR] Saved: {filepath}")
-    else:
-        raise RuntimeError(f"OpenCV failed to write EXR: {filepath}")
+    try:
+        success = cv2.imwrite(filepath, img, exr_flags)
+        if success:
+            # print(f"[FXTD EXR] Saved: {filepath}")
+            pass
+        else:
+            print(f"[FXTD EXR] OpenCV failed to write: {filepath}")
+            return False
+    except Exception as e:
+        print(f"[FXTD EXR] OpenCV Error: {e}")
+        return False
+        
     return success
 
 
@@ -91,12 +108,20 @@ def write_exr_from_channels(filepath: str, channels: Dict[str, np.ndarray],
         first_channel = list(channels.values())[0]
         img = first_channel.astype(np.float32)
     
+    # Set EXR type flags
+    exr_flags = [cv2.IMWRITE_EXR_TYPE, cv2.IMWRITE_EXR_TYPE_FLOAT]
+    
+    if pixel_type == "HALF":
+        exr_flags = [cv2.IMWRITE_EXR_TYPE, cv2.IMWRITE_EXR_TYPE_HALF]
+
     # Write EXR
-    success = cv2.imwrite(filepath, img)
+    success = cv2.imwrite(filepath, img, exr_flags)
     if success:
         print(f"[FXTD EXR] Saved: {filepath}")
     else:
-        raise RuntimeError(f"OpenCV failed to write EXR: {filepath}")
+        # Don't raise error immediately, let caller handle or just print
+        print(f"[FXTD EXR] OpenCV failed to write EXR: {filepath}")
+        return False
     return success
 
 import zlib
@@ -331,9 +356,14 @@ class SimpleEXRWriter:
 
 def check_openexr_available():
     """Check if OpenEXR library is available and working."""
-    # Disabled - OpenEXR library has compatibility issues with Python bindings
-    # Using OpenCV or SimpleEXRWriter instead for reliable EXR export
-    return False
+    try:
+        import OpenEXR
+        import Imath
+        return True
+    except ImportError:
+        return False
+    except Exception:
+        return False
 
 
 def write_exr_openexr(filepath: str, channels: Dict[str, np.ndarray],
@@ -409,12 +439,13 @@ def write_exr_imageio(filepath: str, image: np.ndarray, pixel_type: str = "HALF"
 # COLOR SPACE UTILITIES
 # =============================================================================
 
+
 def linear_to_srgb(img: np.ndarray) -> np.ndarray:
     """Convert linear to sRGB."""
     return np.where(
         img <= 0.0031308,
         img * 12.92,
-        1.055 * np.power(np.maximum(img, 0), 1/2.4) - 0.055
+        1.055 * np.power(np.maximum(img, 1e-10), 1/2.4) - 0.055
     ).astype(np.float32)
 
 
@@ -425,6 +456,99 @@ def srgb_to_linear(img: np.ndarray) -> np.ndarray:
         img / 12.92,
         np.power((np.maximum(img, 0) + 0.055) / 1.055, 2.4)
     ).astype(np.float32)
+
+
+def linear_srgb_to_acescg(img: np.ndarray) -> np.ndarray:
+    """
+    Convert Linear sRGB (Rec.709 primaries) to ACEScg (AP1 primaries).
+    Matrix from CAT02 chromatic adaptation (D65 white point preserved).
+    """
+    # Matrix:
+    # 0.6131, 0.3395, 0.0474
+    # 0.0702, 0.9164, 0.0134
+    # 0.0206, 0.1096, 0.8698
+    
+    # Efficient einsum implementation
+    matrix = np.array([
+        [0.613097, 0.339523, 0.047379],
+        [0.070194, 0.916354, 0.013452],
+        [0.020616, 0.109570, 0.869815]
+    ], dtype=np.float32)
+    
+    # Reshape if needed, or simple dot
+    # If image is H,W,3: values @ matrix.T
+    return np.dot(img, matrix.T)
+
+
+def linear_to_logc3(img: np.ndarray) -> np.ndarray:
+    """ARRI LogC3 Encoding (from Linear)."""
+    # Alexa Wide Gamut primaries conversion omitted for brevity (usually assumed input is AWG, 
+    # but here we encode the values. Ideally user provides Linear sRGB, we should convert to AWG first?)
+    # For now, we apply just the curve as is common in quick export tools, 
+    # OR we assume the user wants values to act like LogC.
+    
+    # Official curve parameters (EI 800)
+    cut = 0.010591
+    a = 5.555556
+    b = 0.052272
+    c = 0.247190
+    d = 0.385537
+    e = 5.367655
+    f = 0.092809
+    
+    out = np.empty_like(img)
+    mask = img > cut
+    
+    # Log part
+    out[mask] = c * np.log10(a * img[mask] + b) + d
+    
+    # Linear part
+    out[~mask] = e * img[~mask] + f
+    
+    return out
+
+
+def linear_to_logc4(img: np.ndarray) -> np.ndarray:
+    """ARRI LogC4 Encoding (from Linear)."""
+    # Curve (Ref: ARRI LogC4 Specification)
+    # y = (log2(8.68337 * x + 1.46788) - 0.55479) / 14.0056   for x > 0.092864 / 5.555556 (approx 0.0167)
+    # y = 5.555556 * x + 0.092864                             for x <= ...
+    
+    # 0.092864 / 5.555556 = 0.016717
+    
+    out = np.empty_like(img)
+    cut = 0.016717094008447384  # (0.092864 / 5.555556)
+    
+    mask = img > cut
+    
+    # Note: np.log2
+    # 8.68337 * x + 1.46788
+    
+    out[mask] = (np.log2(8.68337 * img[mask] + 1.46788) - 0.55479) / 14.0056
+    out[~mask] = 5.555556 * img[~mask] + 0.092864
+    
+    return out
+
+
+def linear_to_slog3(img: np.ndarray) -> np.ndarray:
+    """Sony S-Log3 Encoding (from Linear)."""
+    # y = (420 + log10((x + 0.01) / (0.18 + 0.01)) * 261.5) / 1023   for x >= 0.01125000...
+    # y = (x + 0.01) * (4 * 261.5) / 1023 + 95 / 1023                for x < ...
+    
+    out = np.empty_like(img)
+    cut = 0.011250
+    
+    mask = img >= cut
+    
+    # Log part
+    # ((x + 0.01) / 0.19) -> log10 -> * 261.5 -> + 420 -> / 1023
+    out[mask] = (420.0 + np.log10((img[mask] + 0.01) / 0.19) * 261.5) / 1023.0
+    
+    # Linear part
+    out[~mask] = (img[~mask] + 0.01) * (4.0 * 261.5) / 1023.0 + (95.0 / 1023.0)
+    
+    return out
+
 
 
 # =============================================================================
@@ -454,7 +578,7 @@ class FXTDSaveEXR:
             },
             "optional": {
                 "input_color_space": (["sRGB", "Linear", "Raw"],),
-                "output_color_space": (["Linear", "sRGB", "Same as Input"],),
+                "output_color_space": (["Linear", "sRGB", "ACEScg", "ARRI LogC3", "ARRI LogC4", "Sony S-Log3", "Same as Input"],),
                 "alpha_mode": (["None", "From Image", "Solid White", "Solid Black"],),
                 "premultiply_alpha": ("BOOLEAN", {"default": False}),
                 "subfolder": ("STRING", {"default": ""}),
@@ -494,9 +618,11 @@ class FXTDSaveEXR:
                  channel_format: str = "RGB",
                  prompt=None, extra_pnginfo=None):
         
-        output_dir = self.output_dir
-        if subfolder:
-            output_dir = os.path.join(output_dir, subfolder)
+        if subfolder and os.path.isabs(subfolder):
+            output_dir = subfolder
+        else:
+            output_dir = os.path.join(self.output_dir, subfolder)
+        
         os.makedirs(output_dir, exist_ok=True)
         
         pixel_type = "HALF" if "16" in bit_depth else "FLOAT"
@@ -524,14 +650,33 @@ class FXTDSaveEXR:
         for i in range(batch_size):
             img = images[i].cpu().numpy().astype(np.float32)
             
-            if input_color_space == "sRGB" and output_color_space == "Linear":
-                img_rgb = srgb_to_linear(img[..., :3])
-            elif input_color_space == "Linear" and output_color_space == "sRGB":
-                img_rgb = linear_to_srgb(img[..., :3])
-            elif output_color_space == "Same as Input":
-                img_rgb = img[..., :3]
+            # 1. Convert Input to Linear (Working Space)
+            if input_color_space == "sRGB":
+                img_linear = srgb_to_linear(img[..., :3])
             else:
-                img_rgb = img[..., :3]
+                img_linear = img[..., :3]  # Assume Linear if Raw or Linear
+            
+            # 2. Convert Linear to Output Space
+            if output_color_space == "Linear":
+                img_out = img_linear
+            elif output_color_space == "sRGB":
+                img_out = linear_to_srgb(img_linear)
+            elif output_color_space == "ACEScg":
+                img_out = linear_srgb_to_acescg(img_linear)
+            elif output_color_space == "ARRI LogC3":
+                # Note: This encodes values to LogC3 curve but keeps sRGB primaries 
+                # (unless we add sRGB->AWG matrix, which is complex. For now, curve only).
+                img_out = linear_to_logc3(img_linear)
+            elif output_color_space == "ARRI LogC4":
+                img_out = linear_to_logc4(img_linear)
+            elif output_color_space == "Sony S-Log3":
+                img_out = linear_to_slog3(img_linear)
+            elif output_color_space == "Same as Input":
+                img_out = img[..., :3]
+            else:
+                img_out = img_linear
+            
+            img_rgb = img_out
             
             if alpha_mode == "From Image" and img.shape[-1] == 4:
                 alpha = img[..., 3]
@@ -569,14 +714,31 @@ class FXTDSaveEXR:
             frame_metadata["frame"] = frame_num
             
             try:
+                # Priority 1: OpenEXR (Best metadata support, if available)
                 if use_openexr:
                     write_exr_openexr(filepath, channels, compression, 
                                      pixel_type, frame_metadata)
+                    saved_paths.append(filepath)
+                
+                # Priority 2: OpenCV (Most robust image data, correct bit-depth)
+                # Use for standard RGB/RGBA formats
+                elif channel_format in ["RGB", "RGBA", "ACEScg"]:
+                     # Construct image for OpenCV
+                    cv_img = img_rgb.copy()
+                    if alpha is not None and alpha_mode != "None":
+                         cv_img = np.concatenate([cv_img, alpha[..., np.newaxis]], axis=-1)
+                    
+                    if write_exr_cv2(filepath, cv_img, bit_depth, compression):
+                        saved_paths.append(filepath)
+                    else:
+                        raise RuntimeError("OpenCV write returned False")
+
+                # Priority 3: SimpleEXRWriter (Fallback/Custom channels)
                 else:
                     writer.write(filepath, channels, compression,
                                 pixel_type, frame_metadata)
-                
-                saved_paths.append(filepath)
+                    saved_paths.append(filepath)
+
             except Exception as e:
                 print(f"Error writing EXR {filepath}: {e}")
                 try:
@@ -584,6 +746,7 @@ class FXTDSaveEXR:
                         full_img = np.concatenate([img_rgb, alpha[..., np.newaxis]], axis=-1)
                     else:
                         full_img = img_rgb
+                    # Fallback to imageio if everything else fails
                     write_exr_imageio(filepath, full_img, pixel_type)
                     saved_paths.append(filepath)
                 except Exception as e2:
@@ -652,9 +815,13 @@ class FXTDSaveEXRMultiLayer:
                         custom1_name: str = "custom1", custom2_name: str = "custom2",
                         custom3_name: str = "custom3", subfolder: str = ""):
         
-        output_dir = self.output_dir
-        if subfolder:
-            output_dir = os.path.join(output_dir, subfolder)
+        if subfolder and os.path.isabs(subfolder):
+            output_dir = subfolder
+        else:
+            output_dir = self.output_dir
+            if subfolder:
+                output_dir = os.path.join(output_dir, subfolder)
+        
         os.makedirs(output_dir, exist_ok=True)
         
         if not filename.lower().endswith('.exr'):
@@ -748,6 +915,7 @@ class FXTDSaveEXRSequence:
                 "auto_increment": ("BOOLEAN", {"default": True}),
                 "reset_counter": ("BOOLEAN", {"default": False}),
                 "input_color_space": (["sRGB", "Linear"],),
+                "output_color_space": (["Linear", "sRGB", "ACEScg", "ARRI LogC3", "ARRI LogC4", "Sony S-Log3"],),
                 "add_alpha": ("BOOLEAN", {"default": False}),
             }
         }
@@ -766,9 +934,16 @@ class FXTDSaveEXRSequence:
                       auto_increment: bool = True,
                       reset_counter: bool = False,
                       input_color_space: str = "sRGB",
+                      output_color_space: str = "Linear",
                       add_alpha: bool = False):
         
-        output_dir = os.path.join(self.output_dir, output_folder, sequence_name)
+        if output_folder and os.path.isabs(output_folder):
+             # If absolute path provided, use it directly (appending sequence_name creates a subfolder)
+             # User expectation: output_folder="C:/Renders" -> "C:/Renders/sequence_name/"
+            output_dir = os.path.join(output_folder, sequence_name)
+        else:
+            output_dir = os.path.join(self.output_dir, output_folder, sequence_name)
+            
         os.makedirs(output_dir, exist_ok=True)
         
         if reset_counter and sequence_name in self.frame_counter:
@@ -790,10 +965,29 @@ class FXTDSaveEXRSequence:
         for i in range(batch_size):
             img = images[i].cpu().numpy().astype(np.float32)
             
+            # 1. Convert Input to Linear
             if input_color_space == "sRGB":
-                img_rgb = srgb_to_linear(img[..., :3])
+                img_linear = srgb_to_linear(img[..., :3])
             else:
-                img_rgb = img[..., :3]
+                img_linear = img[..., :3]
+            
+            # 2. Convert Linear to Output Space
+            if output_color_space == "Linear":
+                img_out = img_linear
+            elif output_color_space == "sRGB":
+                img_out = linear_to_srgb(img_linear)
+            elif output_color_space == "ACEScg":
+                img_out = linear_srgb_to_acescg(img_linear)
+            elif output_color_space == "ARRI LogC3":
+                img_out = linear_to_logc3(img_linear)
+            elif output_color_space == "ARRI LogC4":
+                img_out = linear_to_logc4(img_linear)
+            elif output_color_space == "Sony S-Log3":
+                img_out = linear_to_slog3(img_linear)
+            else:
+                img_out = img_linear
+            
+            img_rgb = img_out
             
             channels = {
                 "R": img_rgb[..., 0],
@@ -976,9 +1170,13 @@ class FXTDSaveEXRCryptomatte:
                     crypto_object=None, crypto_material=None, crypto_asset=None,
                     depth=None, subfolder: str = ""):
         
-        output_dir = self.output_dir
-        if subfolder:
-            output_dir = os.path.join(output_dir, subfolder)
+        if subfolder and os.path.isabs(subfolder):
+            output_dir = subfolder
+        else:
+            output_dir = self.output_dir
+            if subfolder:
+                output_dir = os.path.join(output_dir, subfolder)
+        
         os.makedirs(output_dir, exist_ok=True)
         
         if not filename.lower().endswith('.exr'):
@@ -1043,9 +1241,9 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "FXTDSaveEXR": "💾 Radiance Save EXR",
-    "FXTDSaveEXRMultiLayer": "📚 Radiance Save EXR Multi-Layer",
-    "FXTDSaveEXRSequence": "🎬 Radiance Save EXR Sequence",
-    "FXTDEXRChannelMerge": "🔀 Radiance EXR Channel Merge",
-    "FXTDSaveEXRCryptomatte": "🎭 Radiance Save EXR Cryptomatte",
+    "FXTDSaveEXR": "◆ Radiance Save EXR",
+    "FXTDSaveEXRMultiLayer": "◆ Radiance Save EXR Multi-Layer",
+    "FXTDSaveEXRSequence": "◆ Radiance Save EXR Sequence",
+    "FXTDEXRChannelMerge": "◆ Radiance EXR Channel Merge",
+    "FXTDSaveEXRCryptomatte": "◆ Radiance Save EXR Cryptomatte",
 }

@@ -31,7 +31,7 @@ Documentation = "https://fxtd.org/radiance_docs/"
 [tool.comfy]
 PublisherId = "fxtdstudios"
 DisplayName = "radiance"
-Icon = "https://www.fxtd.org/wp-content/uploads/2025/11/FLOGO-00000.png"
+Icon = "docs/FLOGO.png"
 includes = [] 
 # "requires-comfyui" = ">=1.0.0"  # ComfyUI version compatibility
 

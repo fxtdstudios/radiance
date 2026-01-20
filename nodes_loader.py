@@ -110,7 +110,8 @@ class FXTDRadianceLoader:
             clip = comfy.sd.load_clip(
                 ckpt_paths=[clip_path1, clip_path2],
                 embedding_directory=folder_paths.get_folder_paths("embeddings"),
-                clip_type=clip_type
+                clip_type=clip_type,
+                model_options={"load_device": clip_load_device} if clip_load_device else {}
             )
         except Exception as e:
             raise RuntimeError(f"❌ Failed to load CLIPs '{clip_name1}' & '{clip_name2}': {str(e)}")
@@ -131,5 +132,5 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "FXTDRadianceLoader": "☢️ Radiance Unified Loader"
+    "FXTDRadianceLoader": "◆ Radiance Unified Loader"
 }

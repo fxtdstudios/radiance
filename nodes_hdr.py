@@ -87,16 +87,26 @@ def numpy_to_tensor_float32(array: np.ndarray) -> torch.Tensor:
 
 def ensure_linear(image: np.ndarray, gamma: float = 2.2) -> np.ndarray:
     """Convert sRGB to linear color space."""
-    # Handle negative values (can occur in float processing)
+    
+    # Bypass if gamma is 1.0 (Already Linear)
+    if abs(gamma - 1.0) < 0.01:
+        return image.astype(np.float32)
+        
+    # Handle negative values
     sign = np.sign(image)
     abs_image = np.abs(image)
     
-    # sRGB to linear conversion
-    linear = np.where(
-        abs_image <= 0.04045,
-        abs_image / 12.92,
-        np.power((abs_image + 0.055) / 1.055, 2.4)
-    )
+    # If gamma matches sRGB approx (2.2), use the precise sRGB curve
+    if abs(gamma - 2.2) < 0.1:
+        linear = np.where(
+            abs_image <= 0.04045,
+            abs_image / 12.92,
+            np.power((abs_image + 0.055) / 1.055, 2.4)
+        )
+    else:
+        # Generic Gamma
+        linear = np.power(abs_image, gamma)
+        
     return sign * linear
 
 
@@ -109,6 +119,49 @@ def linear_to_srgb(image: np.ndarray) -> np.ndarray:
         abs_image <= 0.0031308,
         abs_image * 12.92,
         1.055 * np.power(abs_image, 1.0/2.4) - 0.055
+    )
+    return sign * srgb
+
+
+def tensor_srgb_to_linear(tensor: torch.Tensor, gamma: float = 2.2) -> torch.Tensor:
+    """
+    Convert sRGB tensor to linear color space.
+    GPU-compatible and differentiable.
+    """
+    # Bypass if gamma is 1.0 (Already Linear)
+    if abs(gamma - 1.0) < 0.01:
+        return tensor.float()
+        
+    # Handle negative values
+    sign = torch.sign(tensor)
+    abs_tensor = torch.abs(tensor)
+    
+    # If gamma matches sRGB approx (2.2), use the precise sRGB curve
+    if abs(gamma - 2.2) < 0.1:
+        linear = torch.where(
+            abs_tensor <= 0.04045,
+            abs_tensor / 12.92,
+            torch.pow((abs_tensor + 0.055) / 1.055, 2.4)
+        )
+    else:
+        # Generic Gamma
+        linear = torch.pow(abs_tensor, gamma)
+        
+    return sign * linear
+
+
+def tensor_linear_to_srgb(tensor: torch.Tensor) -> torch.Tensor:
+    """
+    Convert linear tensor to sRGB color space.
+    GPU-compatible and differentiable.
+    """
+    sign = torch.sign(tensor)
+    abs_tensor = torch.abs(tensor)
+    
+    srgb = torch.where(
+        abs_tensor <= 0.0031308,
+        abs_tensor * 12.92,
+        1.055 * torch.pow(abs_tensor, 1.0/2.4) - 0.055
     )
     return sign * srgb
 
@@ -162,32 +215,67 @@ class Float32ColorCorrect:
     def INPUT_TYPES(cls) -> Dict[str, Any]:
         return {
             "required": {
-                "image": ("IMAGE",),
-                "exposure": ("FLOAT", {"default": 0.0, "min": -10.0, "max": 10.0, "step": 0.1}),
-                "contrast": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 4.0, "step": 0.05}),
-                "brightness": ("FLOAT", {"default": 0.0, "min": -1.0, "max": 1.0, "step": 0.01}),
-                "saturation": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 3.0, "step": 0.05}),
+                "image": ("IMAGE", {"tooltip": "Input image to color correct. Processed in 32-bit float precision."}),
+                "exposure": ("FLOAT", {
+                    "default": 0.0, "min": -10.0, "max": 10.0, "step": 0.1,
+                    "tooltip": "Exposure adjustment in stops. +1 = double brightness, -1 = half brightness. Use for overall brightness control."
+                }),
+                "contrast": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 4.0, "step": 0.05,
+                    "tooltip": "Contrast multiplier around midpoint (0.5). Values >1 increase contrast, <1 decrease. 0 = flat gray."
+                }),
+                "brightness": ("FLOAT", {
+                    "default": 0.0, "min": -1.0, "max": 1.0, "step": 0.01,
+                    "tooltip": "Additive brightness offset. Unlike exposure, this is linear shift not multiplicative."
+                }),
+                "saturation": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 3.0, "step": 0.05,
+                    "tooltip": "Color saturation. 0 = grayscale, 1 = original, >1 = more saturated. Uses Rec.709 luminance-preserving method."
+                }),
             },
             "optional": {
-                "lift_r": ("FLOAT", {"default": 0.0, "min": -0.5, "max": 0.5, "step": 0.01}),
-                "lift_g": ("FLOAT", {"default": 0.0, "min": -0.5, "max": 0.5, "step": 0.01}),
-                "lift_b": ("FLOAT", {"default": 0.0, "min": -0.5, "max": 0.5, "step": 0.01}),
-                "gain_r": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 2.0, "step": 0.01}),
-                "gain_g": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 2.0, "step": 0.01}),
-                "gain_b": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 2.0, "step": 0.01}),
+                "gamma": ("FLOAT", {
+                    "default": 1.0, "min": 0.1, "max": 4.0, "step": 0.01,
+                    "tooltip": "Gamma correction (power curve). <1 = brighten midtones, >1 = darken midtones. Applied after other corrections."
+                }),
+                "lift_r": ("FLOAT", {
+                    "default": 0.0, "min": -0.5, "max": 0.5, "step": 0.01,
+                    "tooltip": "Red channel lift (shadow offset). Adds to red channel after gain. Affects entire tonal range but most visible in shadows."
+                }),
+                "lift_g": ("FLOAT", {
+                    "default": 0.0, "min": -0.5, "max": 0.5, "step": 0.01,
+                    "tooltip": "Green channel lift (shadow offset). Adds to green channel after gain."
+                }),
+                "lift_b": ("FLOAT", {
+                    "default": 0.0, "min": -0.5, "max": 0.5, "step": 0.01,
+                    "tooltip": "Blue channel lift (shadow offset). Adds to blue channel after gain."
+                }),
+                "gain_r": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 2.0, "step": 0.01,
+                    "tooltip": "Red channel gain (multiplier). 1 = no change, <1 = reduce red, >1 = boost red."
+                }),
+                "gain_g": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 2.0, "step": 0.01,
+                    "tooltip": "Green channel gain (multiplier). 1 = no change."
+                }),
+                "gain_b": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 2.0, "step": 0.01,
+                    "tooltip": "Blue channel gain (multiplier). 1 = no change."
+                }),
             }
         }
     
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("image",)
+    OUTPUT_TOOLTIPS = ("Color corrected image in 32-bit float.",)
     FUNCTION = "correct"
     CATEGORY = "FXTD Studios/Radiance/Color"
-    DESCRIPTION = "Professional 32-bit color correction with exposure, contrast, saturation, and per-channel lift/gain controls."
+    DESCRIPTION = "Professional 32-bit color correction with exposure, contrast, saturation, gamma, and per-channel lift/gain controls."
     
     def correct(self, image: torch.Tensor, exposure: float = 0.0, 
                 contrast: float = 1.0, brightness: float = 0.0,
-                saturation: float = 1.0, lift_r: float = 0.0, 
-                lift_g: float = 0.0, lift_b: float = 0.0,
+                saturation: float = 1.0, gamma: float = 1.0,
+                lift_r: float = 0.0, lift_g: float = 0.0, lift_b: float = 0.0,
                 gain_r: float = 1.0, gain_g: float = 1.0, 
                 gain_b: float = 1.0) -> Tuple[torch.Tensor]:
         
@@ -211,6 +299,11 @@ class Float32ColorCorrect:
         if brightness != 0.0:
             img = img + brightness
         
+        # Apply gamma
+        if gamma != 1.0:
+            img = torch.clamp(img, min=0.0)
+            img = torch.pow(img + 1e-8, 1.0 / gamma)
+        
         # Apply saturation
         if saturation != 1.0 and img.shape[-1] >= 3:
             luma = 0.2126 * img[..., 0] + 0.7152 * img[..., 1] + 0.0722 * img[..., 2]
@@ -218,6 +311,7 @@ class Float32ColorCorrect:
             img = luma + saturation * (img - luma)
         
         return (img,)
+
 
 
 class HDRExpandDynamicRange:
@@ -249,31 +343,68 @@ class HDRExpandDynamicRange:
                highlight_recovery: float = 1.0, black_point: float = 0.0,
                target_stops: float = 14.0, highlight_rolloff: float = 1.5) -> Tuple[torch.Tensor]:
         
-        img = tensor_to_numpy_float32(image)
+        # GPU-accelerated implementation
+        img = image.float()
         
-        # Convert to linear
-        linear = ensure_linear(img, source_gamma)
+        # 1. Convert to linear using tensor helper
+        linear = tensor_srgb_to_linear(img, source_gamma)
         
-        # Adjust black point
+        # 2. Adjust black point
         linear = linear - black_point
-        linear = np.maximum(linear, 0.0)
+        linear = torch.clamp(linear, min=0.0)
         
-        # Calculate target peak based on stops
-        target_peak = 2.0 ** (target_stops - 8.0)  # 8 stops = SDR reference
+        # 3. Calculate Luminance (to preserve color relationships)
+        # Using Rec.709 coefficients
+        luma = 0.2126 * linear[..., 0] + 0.7152 * linear[..., 1] + 0.0722 * linear[..., 2]
         
-        # Soft highlight expansion with rolloff
-        # This creates a smooth curve that expands highlights without hard clipping
-        threshold = 0.8
-        mask = linear > threshold
+        # 4. Expansion Logic
+        # Target Peak: 2^(stops - 8). e.g., 14 stops -> 2^6 = 64.0
+        target_peak = 2.0 ** (target_stops - 8.0)
         
-        if highlight_recovery > 0:
-            # Filmic highlight rolloff
-            x = linear[mask]
-            expanded = threshold + (target_peak - threshold) * (1 - np.exp(-highlight_rolloff * (x - threshold)))
-            linear[mask] = np.clip(expanded * highlight_recovery + x * (1 - highlight_recovery), 0, target_peak)
+        # Use highlight_rolloff to control the threshold softness
+        # Higher rolloff = softer transition, starts expansion earlier
+        # Range 1.0-3.0 maps to threshold 0.9-0.5
+        threshold = 1.0 - (highlight_rolloff - 1.0) * 0.2  # rolloff 1.0->0.9, 1.5->0.8, 3.0->0.5
+        threshold = max(0.5, min(0.95, threshold))  # Clamp to safe range
         
-        result = numpy_to_tensor_float32(linear)
-        return (result,)
+        if target_peak > 1.0 and highlight_recovery > 0:
+            t = threshold
+            
+            # Calculate 'a' coefficient for quadratic curve
+            a = (target_peak - 1.0) / ((1.0 - t) ** 2)
+            
+            # Clamp luma for curve calculation
+            luma_clamped = torch.clamp(luma, max=1.0)
+            
+            # Quadratic expansion: y = t + (x - t) + a * (x - t)^2
+            # Only apply to values above threshold
+            expanded_luma = torch.where(
+                luma > t,
+                t + (luma_clamped - t) + a * torch.pow(luma_clamped - t, 2),
+                luma
+            )
+            
+            # For inputs > 1.0, extrapolate linearly with slope at 1.0
+            slope_at_1 = 1.0 + 2 * a * (1.0 - t)
+            expanded_luma = torch.where(
+                luma > 1.0,
+                target_peak + (luma - 1.0) * slope_at_1,
+                expanded_luma
+            )
+            
+            # Blend based on recovery strength
+            final_luma = expanded_luma * highlight_recovery + luma * (1.0 - highlight_recovery)
+            
+            # Apply new luminance to RGB
+            # NewColor = OldColor * (NewLuma / OldLuma)
+            ratio = final_luma / (luma + 1e-8)
+            
+            # Expand dims for RGB multiply
+            ratio = ratio.unsqueeze(-1)
+            
+            linear = linear * ratio
+        
+        return (linear,)
 
 
 class HDRToneMap:
@@ -434,6 +565,14 @@ class HDRToneMap:
         elif operator == "reinhard_extended":
             white_sq = white_point * white_point
             return (x * (1.0 + x / white_sq)) / (1.0 + x)
+        elif operator == "reinhard_luminance":
+            # GPU version of luminance-based Reinhard
+            luma = 0.2126 * x[..., 0] + 0.7152 * x[..., 1] + 0.0722 * x[..., 2]
+            luma = torch.clamp(luma, min=1e-6)
+            white_sq = white_point * white_point
+            luma_tm = (luma * (1.0 + luma / white_sq)) / (1.0 + luma)
+            scale = (luma_tm / luma).unsqueeze(-1)
+            return x * scale
         elif operator == "filmic_aces":
             a, b, c, d, e = 2.51, 0.03, 2.43, 0.59, 0.14
             return torch.clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0, 1)
@@ -522,7 +661,7 @@ class HDRToneMap:
             shadow_lift = config.get("shadow_lift", shadow_lift)
         
         # Try GPU path
-        if use_gpu and torch.cuda.is_available() and operator != "reinhard_luminance":
+        if use_gpu and torch.cuda.is_available():
             try:
                 device = torch.device("cuda")
                 img = image.to(device).float()
@@ -559,7 +698,7 @@ class HDRToneMap:
                 result = torch.clamp(result, 0, 1)
                 result = torch.pow(result, 1.0 / gamma)
                 
-                return (result.cpu(),)
+                return (result,)
                 
             except RuntimeError:
                 torch.cuda.empty_cache()
@@ -2025,6 +2164,20 @@ class LogCurveEncode:
         x = torch.clamp(x, min=1e-10)
         return torch.where(x <= X_BRK, A * x + B, (torch.log2(x) + 9.72) / 17.52)
 
+    def _gpu_canonlog3(self, x: torch.Tensor) -> torch.Tensor:
+        """Canon Log 3 on GPU."""
+        x = torch.clamp(x, min=1e-10)
+        return torch.where(
+            x < 0.014,
+            -(0.36726845 * torch.log10(14.98325 - 9.20208 * x) - 0.12783901),
+            0.36726845 * torch.log10(10.1596 * x + 1) + 0.12783901
+        )
+
+    def _gpu_davinci_intermediate(self, x: torch.Tensor) -> torch.Tensor:
+        """DaVinci Intermediate on GPU."""
+        x = torch.clamp(x, min=1e-10)
+        return torch.log(x * 8191 + 1) / torch.log(torch.tensor(8192.0, device=x.device))
+
     def encode(self, image: torch.Tensor, log_curve: str = "ARRI LogC3 (EI 800)",
                input_is_linear: bool = True, source_gamma: float = 2.2,
                exposure_offset: float = 0.0, use_gpu: bool = True) -> Tuple[torch.Tensor, str]:
@@ -2064,11 +2217,17 @@ class LogCurveEncode:
                 elif log_curve == "ACEScct":
                     result = self._gpu_acescct(img)
                     curve_info = "ACEScct | GPU | Mid Gray: 0.413"
-                else:  # CPU fallback for others
+                elif log_curve == "Canon Log 3":
+                    result = self._gpu_canonlog3(img)
+                    curve_info = "Canon Log 3 | GPU | Mid Gray: 0.343"
+                elif log_curve == "DaVinci Intermediate":
+                    result = self._gpu_davinci_intermediate(img)
+                    curve_info = "DaVinci Intermediate | GPU | Mid Gray: 0.336"
+                else:
                     raise RuntimeError("Use CPU path")
                 
                 result = torch.clamp(result, 0.0, 1.0)
-                return (result.cpu(), curve_info)
+                return (result, curve_info)
                 
             except RuntimeError:
                 torch.cuda.empty_cache()
@@ -2182,10 +2341,32 @@ class LogCurveDecode:
         Y_BRK, A, B = 0.155251141552511, 10.5402377416545, 0.0729055341958355
         return torch.where(x <= Y_BRK, (x - B) / A, torch.pow(2.0, x * 17.52 - 9.72))
 
+    def _gpu_vlog_decode(self, x: torch.Tensor) -> torch.Tensor:
+        """Panasonic V-Log decode on GPU."""
+        cut_out, b, c, d = 0.181, 0.00873, 0.241514, 0.598206
+        return torch.where(x < cut_out, (x - 0.125) / 5.6, torch.pow(10.0, (x - d) / c) - b)
+
+    def _gpu_canonlog3_decode(self, x: torch.Tensor) -> torch.Tensor:
+        """Canon Log 3 decode on GPU."""
+        cut = 0.04076162
+        return torch.where(
+            x < cut,
+            (14.98325 - torch.pow(10.0, (0.12783901 - x) / 0.36726845)) / 9.20208,
+            (torch.pow(10.0, (x - 0.12783901) / 0.36726845) - 1) / 10.1596
+        )
+
+    def _gpu_davinci_decode(self, x: torch.Tensor) -> torch.Tensor:
+        """DaVinci Intermediate decode on GPU."""
+        return (torch.pow(8192.0, x) - 1) / 8191
+
     def _arri_logc3_decode(self, log_val: np.ndarray) -> np.ndarray:
         """ARRI LogC3 decoding."""
         cut, a, b, c, d, e, f = 0.1496582, 5.555556, 0.052272, 0.247190, 0.385537, 5.367655, 0.092809
         return np.where(log_val > cut, (10.0 ** ((log_val - d) / c) - b) / a, (log_val - f) / e)
+
+    def _arri_logc4_decode(self, log_val: np.ndarray) -> np.ndarray:
+        """ARRI LogC4 decoding."""
+        return 2.0 ** (log_val * 14 - 7)
 
     def _slog3_decode(self, log_val: np.ndarray) -> np.ndarray:
         """Sony S-Log3 decoding."""
@@ -2194,6 +2375,24 @@ class LogCurveDecode:
             10.0 ** ((log_val * 1023.0 - 420.0) / 261.5) * (0.18 + 0.01) - 0.01,
             (log_val * 1023.0 - 95.0) * 0.01125000 / (171.2102946929 - 95.0)
         )
+
+    def _vlog_decode(self, log_val: np.ndarray) -> np.ndarray:
+        """Panasonic V-Log decoding."""
+        cut_out, b, c, d = 0.181, 0.00873, 0.241514, 0.598206
+        return np.where(log_val < cut_out, (log_val - 0.125) / 5.6, 10.0 ** ((log_val - d) / c) - b)
+
+    def _canonlog3_decode(self, log_val: np.ndarray) -> np.ndarray:
+        """Canon Log 3 decoding."""
+        cut = 0.04076162
+        return np.where(
+            log_val < cut,
+            (14.98325 - 10.0 ** ((0.12783901 - log_val) / 0.36726845)) / 9.20208,
+            (10.0 ** ((log_val - 0.12783901) / 0.36726845) - 1) / 10.1596
+        )
+
+    def _davinci_decode(self, log_val: np.ndarray) -> np.ndarray:
+        """DaVinci Intermediate decoding."""
+        return (np.power(8192.0, log_val) - 1) / 8191
 
     def _acescct_decode(self, log_val: np.ndarray) -> np.ndarray:
         """ACEScct decoding."""
@@ -2221,6 +2420,12 @@ class LogCurveDecode:
                     result = self._gpu_slog3_decode(img)
                 elif log_curve == "ACEScct":
                     result = self._gpu_acescct_decode(img)
+                elif log_curve == "Panasonic V-Log":
+                    result = self._gpu_vlog_decode(img)
+                elif log_curve == "Canon Log 3":
+                    result = self._gpu_canonlog3_decode(img)
+                elif log_curve == "DaVinci Intermediate":
+                    result = self._gpu_davinci_decode(img)
                 else:
                     raise RuntimeError("Use CPU path")
                 
@@ -2232,7 +2437,7 @@ class LogCurveDecode:
                 if output_gamma != 1.0:
                     result = torch.pow(torch.clamp(result, min=0.0), 1.0 / output_gamma)
                 
-                return (result.cpu(),)
+                return (result,)
                 
             except RuntimeError:
                 torch.cuda.empty_cache()
@@ -2245,12 +2450,19 @@ class LogCurveDecode:
             result = img
         elif log_curve == "ARRI LogC3 (EI 800)":
             result = self._arri_logc3_decode(img)
+        elif log_curve == "ARRI LogC4 (ALEXA 35)":
+            result = self._arri_logc4_decode(img)
         elif log_curve == "Sony S-Log3":
             result = self._slog3_decode(img)
+        elif log_curve == "Panasonic V-Log":
+            result = self._vlog_decode(img)
+        elif log_curve == "Canon Log 3":
+            result = self._canonlog3_decode(img)
+        elif log_curve == "DaVinci Intermediate":
+            result = self._davinci_decode(img)
         elif log_curve == "ACEScct":
             result = self._acescct_decode(img)
         else:
-            # For curves without decode implementation, pass through
             result = img
         
         # Apply exposure offset
@@ -2589,13 +2801,39 @@ class HDRShadowHighlightRecovery:
         lum = np.maximum(lum, 1e-10)
         
         # Shadow recovery
-        shadow_mask = np.clip((shadow_tone - lum) / shadow_tone, 0, 1) ** 2
+        # Soft mask that decays as luminance increases, without hard 0-1 clipping
+        # shadow_mask = np.clip((shadow_tone - lum) / shadow_tone, 0, 1) ** 2  <-- OLD (Clamped)
+        
+        # New HDR-safe mask: 1.0 at 0, smooth falloff to 0.0 at shadow_tone
+        shadow_ratio = lum / (shadow_tone + 1e-6)
+        shadow_mask = np.exp(-3.0 * shadow_ratio)  # Exponential decay
+        
         shadow_boost = (1.0 + shadow_amount * shadow_mask)
         
         # Highlight recovery
-        highlight_range = 1.0 - highlight_tone
-        highlight_mask = np.clip((lum - highlight_tone) / highlight_range, 0, 1) ** 2
-        highlight_reduce = (1.0 - highlight_amount * highlight_mask * 0.5)
+        # Old logic assumed highlights start at 'highlight_tone' (e.g. 0.75) and end at 1.0
+        # For HDR, highlights go to infinity.
+        # highlight_mask = np.clip((lum - highlight_tone) / highlight_range, 0, 1) ** 2 <-- OLD
+        
+        # New HDR-safe mask: 0.0 below tone, smooth rise to 1.0+ above
+        # Use a smoothstep-like function that doesn't clamp at 1.0
+        
+        # Normalized position above threshold
+        h_pos = (lum - highlight_tone) / (1.0 - highlight_tone + 1e-6)
+        
+        # Sigmoid-like activation that works for > 1.0
+        # value 0 at h_pos <= 0
+        # rises to 1.0 at h_pos = 1.0
+        # continues rising for h_pos > 1.0 (to catch super-whites)
+        
+        highlight_mask = np.maximum(0.0, h_pos)
+        
+        # Apply reduction
+        # We want to compress range, not clamp it. 
+        # reduction factor should approach 1/amount asymptotically? 
+        # simpler: just apply the curve.
+        
+        highlight_reduce = 1.0 / (1.0 + highlight_amount * highlight_mask * 0.5)
         
         # Apply to image
         result = img * shadow_boost[..., np.newaxis] * highlight_reduce[..., np.newaxis]
@@ -3299,7 +3537,8 @@ class HDR360Generate:
     Generate 360° equirectangular panoramas for HDRI environment mapping.
     
     Creates industry-standard equirectangular projections from source images
-    that can be used as environment maps in 3D applications.
+    that can be used as environment maps in 3D applications like Blender,
+    Maya, Unreal Engine, and Unity.
     """
     
     PROJECTION_TYPES = ["Equirectangular", "Cube_Map", "Mirror_Ball", "Angular_Map"]
@@ -3310,28 +3549,62 @@ class HDR360Generate:
     def INPUT_TYPES(cls) -> Dict[str, Any]:
         return {
             "required": {
-                "source_image": ("IMAGE",),
-                "projection_type": (cls.PROJECTION_TYPES, {"default": "Equirectangular"}),
-                "output_width": ("INT", {"default": 4096, "min": 512, "max": 16384, "step": 64}),
-                "output_height": ("INT", {"default": 2048, "min": 256, "max": 8192, "step": 64}),
+                "source_image": ("IMAGE", {"tooltip": "Input image to project. For best results, use a wide or panoramic image."}),
+                "projection_type": (cls.PROJECTION_TYPES, {
+                    "default": "Equirectangular",
+                    "tooltip": "Projection type: Equirectangular (standard HDRI), Cube_Map (6-face), Mirror_Ball (chrome ball), Angular_Map (light probe)."
+                }),
+                "output_width": ("INT", {
+                    "default": 4096, "min": 512, "max": 16384, "step": 64,
+                    "tooltip": "Output panorama width in pixels. Standard HDRI sizes: 2048 (preview), 4096 (standard), 8192 (high), 16384 (ultra)."
+                }),
+                "output_height": ("INT", {
+                    "default": 2048, "min": 256, "max": 8192, "step": 64,
+                    "tooltip": "Output panorama height. For equirectangular, height should be half of width (2:1 ratio)."
+                }),
             },
             "optional": {
-                "horizontal_fov": ("FLOAT", {"default": 360.0, "min": 30.0, "max": 360.0, "step": 1.0}),
-                "vertical_fov": ("FLOAT", {"default": 180.0, "min": 15.0, "max": 180.0, "step": 1.0}),
-                "rotation_x": ("FLOAT", {"default": 0.0, "min": -180.0, "max": 180.0, "step": 1.0}),
-                "rotation_y": ("FLOAT", {"default": 0.0, "min": -180.0, "max": 180.0, "step": 1.0}),
-                "rotation_z": ("FLOAT", {"default": 0.0, "min": -180.0, "max": 180.0, "step": 1.0}),
-                "interpolation": (cls.INTERPOLATION_MODES, {"default": "Lanczos"}),
-                "fill_mode": (cls.FILL_MODES, {"default": "Mirror"}),
-                "exposure_adjust": ("FLOAT", {"default": 0.0, "min": -5.0, "max": 5.0, "step": 0.1}),
+                "horizontal_fov": ("FLOAT", {
+                    "default": 360.0, "min": 30.0, "max": 360.0, "step": 1.0,
+                    "tooltip": "Horizontal field of view in degrees. 360° = full sphere, less = partial panorama."
+                }),
+                "vertical_fov": ("FLOAT", {
+                    "default": 180.0, "min": 15.0, "max": 180.0, "step": 1.0,
+                    "tooltip": "Vertical field of view in degrees. 180° = pole to pole, less = band around horizon."
+                }),
+                "rotation_x": ("FLOAT", {
+                    "default": 0.0, "min": -180.0, "max": 180.0, "step": 1.0,
+                    "tooltip": "Rotation around X axis (pitch) in degrees. Tilts the panorama up/down."
+                }),
+                "rotation_y": ("FLOAT", {
+                    "default": 0.0, "min": -180.0, "max": 180.0, "step": 1.0,
+                    "tooltip": "Rotation around Y axis (yaw) in degrees. Rotates the panorama left/right."
+                }),
+                "rotation_z": ("FLOAT", {
+                    "default": 0.0, "min": -180.0, "max": 180.0, "step": 1.0,
+                    "tooltip": "Rotation around Z axis (roll) in degrees. Tilts the horizon."
+                }),
+                "interpolation": (cls.INTERPOLATION_MODES, {
+                    "default": "Lanczos",
+                    "tooltip": "Sampling interpolation: Lanczos (highest quality), Bicubic (good), Bilinear (fast), Nearest (pixelated)."
+                }),
+                "fill_mode": (cls.FILL_MODES, {
+                    "default": "Mirror",
+                    "tooltip": "How to fill areas outside source image: Mirror (reflects), Repeat (tiles), Black (transparent), Edge (extends edge pixels)."
+                }),
+                "exposure_adjust": ("FLOAT", {
+                    "default": 0.0, "min": -5.0, "max": 5.0, "step": 0.1,
+                    "tooltip": "Exposure adjustment in stops. +1 = double brightness, -1 = half brightness."
+                }),
             }
         }
     
     RETURN_TYPES = ("IMAGE", "IMAGE")
     RETURN_NAMES = ("panorama", "projection_map")
+    OUTPUT_TOOLTIPS = ("Generated 360° panorama.", "UV projection map for debugging.")
     FUNCTION = "generate"
     CATEGORY = "FXTD Studios/Radiance/Color"
-    DESCRIPTION = "Generate 360° equirectangular panoramas for HDRI environment mapping."
+    DESCRIPTION = "Generate 360° equirectangular panoramas for HDRI environment mapping in 3D applications."
     
     def _create_rotation_matrix(self, rx: float, ry: float, rz: float) -> np.ndarray:
         """Create 3D rotation matrix from Euler angles (in degrees)."""
@@ -3521,24 +3794,43 @@ class SaveHDRI:
     def INPUT_TYPES(cls) -> Dict[str, Any]:
         return {
             "required": {
-                "panorama": ("IMAGE",),
-                "filename_prefix": ("STRING", {"default": "output/hdri_"}),
-                "format": (cls.FORMATS, {"default": "EXR"}),
+                "panorama": ("IMAGE", {"tooltip": "HDR panorama image to save. Should be in linear color space for proper HDR."}),
+                "filename_prefix": ("STRING", {
+                    "default": "output/hdri_",
+                    "tooltip": "Filename prefix including path. Numbers will be appended: hdri_0001.exr, hdri_0002.exr, etc."
+                }),
+                "format": (cls.FORMATS, {
+                    "default": "EXR",
+                    "tooltip": "Output format: EXR (best for VFX, supports layers), HDR (Radiance RGBE, widely compatible), TIFF (16-bit integer)."
+                }),
             },
             "optional": {
-                "bit_depth": (cls.BIT_DEPTHS, {"default": "float32"}),
-                "compression": (cls.COMPRESSIONS, {"default": "ZIP"}),
-                "include_metadata": ("BOOLEAN", {"default": True}),
-                "gamma": ("FLOAT", {"default": 1.0, "min": 0.1, "max": 4.0, "step": 0.1}),
+                "bit_depth": (cls.BIT_DEPTHS, {
+                    "default": "float32",
+                    "tooltip": "Floating point precision: float32 (full precision, larger files), float16 (half precision, smaller files)."
+                }),
+                "compression": (cls.COMPRESSIONS, {
+                    "default": "ZIP",
+                    "tooltip": "EXR compression: ZIP (lossless, good), PIZ (lossless, fast), DWAA/DWAB (lossy, smallest), NONE (fastest), RLE (fast)."
+                }),
+                "include_metadata": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Save JSON metadata file with image info (dimensions, dynamic range, peak luminance)."
+                }),
+                "gamma": ("FLOAT", {
+                    "default": 1.0, "min": 0.1, "max": 4.0, "step": 0.1,
+                    "tooltip": "Pre-save gamma. 1.0 = linear (recommended for HDR). Only change if you need gamma-encoded output."
+                }),
             }
         }
     
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("file_path",)
+    OUTPUT_TOOLTIPS = ("Path to saved HDRI file.",)
     OUTPUT_NODE = True
     FUNCTION = "save"
     CATEGORY = "FXTD Studios/Radiance/Color"
-    DESCRIPTION = "Save HDR panoramas as HDRI environment maps (EXR/HDR/TIFF)."
+    DESCRIPTION = "Save HDR panoramas as HDRI environment maps (EXR/HDR/TIFF) for use in 3D applications."
     
     def save(self, panorama: torch.Tensor, filename_prefix: str = "output/hdri_",
              format: str = "EXR", bit_depth: str = "float32",
@@ -4073,9 +4365,178 @@ class ARRIWideGamut4:
         
         else:  # Linear sRGB to AWG4
             xyz = img @ self.SRGB_TO_XYZ.T
-            result = xyz @ self.XYZ_TO_AWG4.T
-        
         return (numpy_to_tensor_float32(result),)
+
+
+class RadianceVAEEncode:
+    """
+    Professional VAE Encoder with 32-bit Color Space awareness.
+    
+    Bridges the gap between Linear/ACEScg pipelines and Standard VAEs.
+    Allows encoding of high dynamic range data without forced clamping.
+    """
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Any]:
+        return {
+            "required": {
+                "pixels": ("IMAGE",),
+                "vae": ("VAE",),
+                "source_space": (["Linear", "ACEScg", "sRGB", "Raw"], {"default": "Linear"}),
+                "exposure": ("FLOAT", {"default": 0.0, "min": -10.0, "max": 10.0, "step": 0.1}),
+                "clip_to_0_1": ("BOOLEAN", {"default": False, "tooltip": "Force values to 0.0-1.0 range. Disable for HDR experiments."}),
+            }
+        }
+    
+    RETURN_TYPES = ("LATENT",)
+    FUNCTION = "encode"
+    CATEGORY = "FXTD Studios/Radiance/IO"
+    DESCRIPTION = "Encode 32-bit Linear/ACEScg images to VAE Latents with correct color handling."
+    
+    def encode(self, pixels: torch.Tensor, vae: Any, source_space: str = "Linear",
+               exposure: float = 0.0, clip_to_0_1: bool = False) -> Tuple[Dict[str, Any]]:
+        
+        # 1. Standardize Input (Clone to avoid modifying original)
+        img = pixels.clone().float()
+        
+        # 2. Apply Exposure (32-bit float operation)
+        if exposure != 0.0:
+            img = img * (2.0 ** exposure)
+        
+        # 3. Transform to sRGB (Standard VAE Input Space)
+        # Most VAEs (SD1.5, SDXL, Flux) expect Gamma-Corrected sRGB inputs ~ [0,1]
+        
+        if source_space == "Linear":
+            img = tensor_linear_to_srgb(img)
+            
+        elif source_space == "ACEScg":
+            # ACEScg (AP1) -> Linear sRGB (Rec.709) -> sRGB Gamma
+            # Matrix: ACEScg to Rec.709 (Linear)
+            # AP1_TO_REC709
+            AP1_TO_REC709 = torch.tensor([
+                [1.6410, -0.3249, -0.2365],
+                [-0.6636, 1.6153, 0.0168],
+                [0.0117, -0.0084, 0.9884]
+            ], dtype=img.dtype, device=img.device).T
+            
+            # Matmul: (..., 3) @ (3, 3)
+            # Handle dimensions
+            orig_shape = img.shape
+            if img.dim() == 4:
+                rgb = img[..., :3].reshape(-1, 3)
+                img[..., :3] = (rgb @ AP1_TO_REC709).reshape(orig_shape[0], orig_shape[1], orig_shape[2], 3)
+            elif img.dim() == 3 and img.shape[-1] == 3:
+                 img = img @ AP1_TO_REC709
+            
+            # Now Linear Rec.709 -> sRGB Gamma using Helper
+            img = tensor_linear_to_srgb(img)
+
+        # "sRGB" source implies it's already in Gamma space, no transform needed.
+        # "Raw" implies passthrough.
+
+        # 4. Handling 32-bit High Range (Values > 1.0)
+        # Standard VAEs are trained on 0-1. Values > 1.0 (whiter than white)
+        # might be encoded, but decoding them is not guaranteed.
+        # However, the user explicitly requested "Match 32 bit pipeline" and "Not Clamped".
+        
+        if clip_to_0_1:
+            img = torch.clamp(img, 0.0, 1.0)
+        
+        # 5. Encode
+        # Resize logic is usually handled by VAEEncode, but here we assume 'pixels'
+        # are fed directly. ComfyUI VAE encode usually takes (B, H, W, 3).
+        
+        # img is (B, H, W, 3)
+        # ComfyUI vae.encode expected layout: (B, H, W, 3)
+        
+        return (vae.encode(img[:,:,:,:3]),)
+
+
+class RadianceVAEDecode:
+    """
+    Professional VAE Decoder for 32-bit HDR Pipelines.
+    
+    Decodes Latents directly into Linear or ACEScg space,
+    bypassing manual conversion steps and ensuring float32 precision.
+    """
+    
+    @classmethod
+    def INPUT_TYPES(cls) -> Dict[str, Any]:
+        return {
+            "required": {
+                "samples": ("LATENT",),
+                "vae": ("VAE",),
+                "target_space": (["Linear", "ACEScg", "sRGB", "Raw"], {"default": "Linear"}),
+                "exposure_adjust": ("FLOAT", {"default": 0.0, "min": -10.0, "max": 10.0, "step": 0.1}),
+            }
+        }
+    
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "decode"
+    CATEGORY = "FXTD Studios/Radiance/IO"
+    DESCRIPTION = "Decode VAE Latents directly to 32-bit Linear/ACEScg images."
+    
+    def decode(self, samples: Dict[str, Any], vae: Any, target_space: str = "Linear",
+               exposure_adjust: float = 0.0) -> Tuple[torch.Tensor]:
+        
+        # 1. Decode (Standard VAE output is sRGB Gamma 2.2)
+        # VAE decode returns tensor (B, H, W, 3) in [0, 1] usually
+        img = vae.decode(samples["samples"])
+        
+        # Ensure float32
+        img = img.float()
+        
+        # 2. Exposure Adjust & Color Space Conversion
+        # All operations performed on Tether/GPU using pure Torch
+        
+        if target_space == "Raw":
+             # "Raw" implies untouched structure, but we can still apply exposure
+             if exposure_adjust != 0.0:
+                 img = img * (2.0 ** exposure_adjust)
+        
+        elif target_space == "sRGB":
+            # Input is already sRGB (Gamma 2.2-ish)
+            
+            # If exposure is requested, we must linearize -> expose -> re-gamma
+            # strictly for correctness.
+            if exposure_adjust != 0.0:
+                linear = tensor_srgb_to_linear(img)
+                linear = linear * (2.0 ** exposure_adjust)
+                img = tensor_linear_to_srgb(linear)
+        
+        elif target_space == "Linear":
+            img = tensor_srgb_to_linear(img)
+            if exposure_adjust != 0.0:
+                img = img * (2.0 ** exposure_adjust)
+                
+        elif target_space == "ACEScg":
+            # sRGB -> Linear sRGB -> ACEScg
+            linear = tensor_srgb_to_linear(img)
+            
+            if exposure_adjust != 0.0:
+                linear = linear * (2.0 ** exposure_adjust)
+            
+            # Matrix: Linear sRGB (Rec.709) -> ACEScg (AP1)
+            # REC709_TO_AP1
+            # Row-major for direct multiplication with (..., 3)
+            # Source (Rec709) -> Dest (AP1)
+            REC709_TO_AP1 = torch.tensor([
+                [0.613097, 0.339523, 0.047379],
+                [0.070194, 0.916354, 0.013452],
+                [0.020616, 0.109570, 0.869815]
+            ], dtype=img.dtype, device=img.device).T
+            
+            # Apply matrix multiplication
+            # Handle (B, H, W, 3) or (H, W, 3)
+            if img.shape[-1] == 3:
+                # Optimized einsum or matmul
+                img = torch.matmul(linear, REC709_TO_AP1)
+            else:
+                # Fallback purely linear (shouldn't happen for valid VAE output)
+                img = linear
+
+        return (img,)
+
 
 #                          NODE MAPPINGS
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -4097,41 +4558,41 @@ NODE_CLASS_MAPPINGS = {
     "HDRShadowHighlightRecovery": HDRShadowHighlightRecovery,
     "OCIOColorTransform": OCIOColorTransform,
     "OCIOListColorspaces": OCIOListColorspaces,
-    "LUTApply": LUTApply,
-    "GPUColorMatrix": GPUColorMatrix,
     "GPUTensorOps": GPUTensorOps,
     "HDR360Generate": HDR360Generate,
     "SaveHDRI": SaveHDRI,
     "ACES2OutputTransform": ACES2OutputTransform,
     "DaVinciWideGamut": DaVinciWideGamut,
     "ARRIWideGamut4": ARRIWideGamut4,
+    "RadianceVAEEncode": RadianceVAEEncode,
+    "RadianceVAEDecode": RadianceVAEDecode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "ImageToFloat32": "🎨 Radiance Image to Float32",
-    "Float32ColorCorrect": "🎨 Radiance Float32 Color Correct",
-    "HDRExpandDynamicRange": "🌅 Radiance HDR Expand Dynamic Range",
-    "HDRToneMap": "🌅 Radiance HDR Tone Map",
-    "ColorSpaceConvert": "🔄 Radiance Color Space Convert",
-    "SaveImageEXR": "💾 Radiance Save EXR (32-bit)",
-    "LoadImageEXR": "📂 Radiance Load EXR",
-    "LoadImageEXRSequence": "📂 Radiance Load EXR Sequence",
-    "SaveImage16bit": "💾 Radiance Save 16-bit PNG/TIFF",
-    "HDRHistogram": "📊 Radiance HDR Histogram",
-    "LogCurveEncode": "📈 Radiance Log Curve Encode",
-    "LogCurveDecode": "📉 Radiance Log Curve Decode",
-    "HDRExposureBlend": "🔀 Radiance HDR Exposure Blend",
-    "HDRShadowHighlightRecovery": "🌓 Radiance HDR Shadow/Highlight Recovery",
-    "OCIOColorTransform": "🌈 Radiance OCIO Color Transform",
-    "OCIOListColorspaces": "📋 Radiance OCIO List Colorspaces",
-    "LUTApply": "🎬 Radiance LUT Apply",
-    "GPUColorMatrix": "⚡ Radiance GPU Color Matrix",
-    "GPUTensorOps": "⚡ Radiance GPU Tensor Ops",
-    "HDR360Generate": "🌐 Radiance HDR 360 Generate",
-    "SaveHDRI": "💾 Radiance Save HDRI",
-    "ACES2OutputTransform": "🎬 Radiance ACES 2.0 Output Transform",
-    "DaVinciWideGamut": "🎨 Radiance DaVinci Wide Gamut",
-    "ARRIWideGamut4": "📷 Radiance ARRI Wide Gamut 4",
+    "ImageToFloat32": "◆ Radiance Image to Float32",
+    "Float32ColorCorrect": "◆ Radiance Float32 Color Correct",
+    "HDRExpandDynamicRange": "◆ Radiance HDR Expand Dynamic Range",
+    "HDRToneMap": "◆ Radiance HDR Tone Map",
+    "ColorSpaceConvert": "◆ Radiance Color Space Convert",
+    "SaveImageEXR": "◆ Radiance Save EXR (32-bit)",
+    "LoadImageEXR": "◆ Radiance Load EXR",
+    "LoadImageEXRSequence": "◆ Radiance Load EXR Sequence",
+    "SaveImage16bit": "◆ Radiance Save 16-bit PNG/TIFF",
+    "HDRHistogram": "◆ Radiance HDR Histogram",
+    "LogCurveEncode": "◆ Radiance Log Curve Encode",
+    "LogCurveDecode": "◆ Radiance Log Curve Decode",
+    "HDRExposureBlend": "◆ Radiance HDR Exposure Blend",
+    "HDRShadowHighlightRecovery": "◆ Radiance HDR Shadow/Highlight Recovery",
+    "OCIOColorTransform": "◆ Radiance OCIO Color Transform",
+    "OCIOListColorspaces": "◆ Radiance OCIO List Colorspaces",
+    "GPUTensorOps": "◆ Radiance GPU Tensor Ops",
+    "HDR360Generate": "◆ Radiance HDR 360 Generate",
+    "SaveHDRI": "◆ Radiance Save HDRI",
+    "ACES2OutputTransform": "◆ Radiance ACES 2.0 Output Transform",
+    "DaVinciWideGamut": "◆ Radiance DaVinci Wide Gamut",
+    "ARRIWideGamut4": "◆ Radiance ARRI Wide Gamut 4",
+    "RadianceVAEEncode": "◆ Radiance VAE Encode (32-bit)",
+    "RadianceVAEDecode": "◆ Radiance VAE Decode (32-bit)",
 }
 
 

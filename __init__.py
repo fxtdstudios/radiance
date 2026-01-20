@@ -119,7 +119,7 @@ NODE_CLASS_MAPPINGS.update({
     "FXTDCinematicPromptEncoder": FXTDCinematicPromptEncoder,
 })
 NODE_DISPLAY_NAME_MAPPINGS.update({
-    "FXTDCinematicPromptEncoder": "🎬 Radiance Cinematic Encoder",
+    "FXTDCinematicPromptEncoder": "◆ Radiance Cinematic Encoder",
 })
 
 # Add Help node
@@ -140,7 +140,7 @@ NODE_CLASS_MAPPINGS.update({
     "FXTD_DNA_Reader": FXTDDNAReader
 })
 NODE_DISPLAY_NAME_MAPPINGS.update({
-    "FXTD_DNA_Reader": "🧬 Radiance DNA Reader"
+    "FXTD_DNA_Reader": "◆ Radiance DNA Reader"
 })
 
 # Add Resolution node (Industry-standard presets)
@@ -154,9 +154,14 @@ from .nodes_loader import NODE_CLASS_MAPPINGS as LOADER_NODES, NODE_DISPLAY_NAME
 NODE_CLASS_MAPPINGS.update(LOADER_NODES)
 NODE_DISPLAY_NAME_MAPPINGS.update(LOADER_NAMES)
 
+# Add LUT and Color Matrix nodes
+from .nodes_lut import NODE_CLASS_MAPPINGS as LUT_NODES, NODE_DISPLAY_NAME_MAPPINGS as LUT_NAMES
+NODE_CLASS_MAPPINGS.update(LUT_NODES)
+NODE_DISPLAY_NAME_MAPPINGS.update(LUT_NAMES)
+
 
 # Package info
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __author__ = "FXTD Studios"
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS', 'WEB_DIRECTORY']
 

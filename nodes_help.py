@@ -86,5 +86,5 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "FXTDHelp": "❓ Radiance Help & Docs",
+    "FXTDHelp": "◆ Radiance Help & Docs",
 }
