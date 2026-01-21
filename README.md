@@ -24,7 +24,7 @@
 - **Film Effects** - 30+ camera sensors, 20+ film stocks
 - **Industry Scopes** - Histogram, Waveform, Vectorscope
 - **GPU Accelerated** - 10-50x faster with CUDA
-- **Pro Viewer** - Flame/Nuke-style interactive viewer
+- **RADIANCE Viewer** - Flame/Nuke-style interactive viewer
 - **Camera Simulation** - White balance, lens effects, presets
 - **EXR/HDR Support** - Full OpenEXR read/write
 - **Unified Loading** - Simplified model loading workflow
