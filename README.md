@@ -71,9 +71,6 @@ pip install -r requirements.txt
 
 ---
 
-## Example Workflow
-
-![Example Workflow](docs/example/workflow.png)
 
 ## Quick Start
 
