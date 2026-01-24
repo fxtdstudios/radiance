@@ -298,8 +298,6 @@ Radiance is built on industry-standard open source libraries:
 
 We welcome contributions from the community! Whether it's adding new features, fixing bugs, or improving documentation, your help is appreciated.
 
-Please check our [Contributing Guide](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and code of conduct.
-
 ---
 
 ## License
